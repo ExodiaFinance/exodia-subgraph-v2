@@ -1,0 +1,142 @@
+# UML diagram
+# ┌────────────────────────┐
+# │SimpleStaking           │
+# ├────────────────────────┤
+# │id: timestamp           │
+# │stakedSupply: BigDecimal│
+# │apy: BigDecimal         │
+# │index: BigDecimal       │
+# │nextEpochRebase: BigInt │
+# └────────────────────────┘
+
+# ┌─────────────────────────────┐
+# │ProtocolMetric               │
+# ├─────────────────────────────┤
+# │id: timestamp                │
+# │circulatingSupply: BigDecimal│
+# │totalSupply: BigDecimal      │
+# │price: BigDecimal            │
+# │marketCap: BigDecimal        │
+# │tvl: BigDecimal              │
+# │holders: BigInt              │
+# │runway: BigDecimal           │
+# └─────────────────────────────┘
+#                                       ┌──────────────────────┐
+# ┌─────────────────────────┐1          │TokenBalance          │
+# │Treasury                 │◄───┐      ├──────────────────────┤
+# ├─────────────────────────┤    │      │id: address-timestamp │1..*     1 ┌────────────────┐
+# │id: timestamp            │    │      │token: Token          ├──────────►│Token           │
+# │marketValue: BigDecimal  │    │      │balance: BigDecimal   │           ├────────────────┤
+# │riskFreeValue: BigDecimal│    │  1..*│value: BigDecimal     │           │id: address     │
+# └─────────────────────────┘    └──────┤treasury: Treasury    │           │ticker: String  │
+#                                       │isRiskFree: Boolean   │           │fullName: String│
+#                                       │isLiquidity: Boolean  │           └────────────────┘
+#                                    ┌► │liquidity: Liquidity  │
+#                                    │  │timestamp: BigInt     │  
+#                               2..* │  └──────────────────────┘  
+#                                    │                            
+#                                    │                       
+#                                    │  ┌──────────────────────┐  
+#                               0..1 └─►│Liquidity             │  
+#                                       ├──────────────────────┤  
+#                                       │id: address-timestamp │  
+#                                       │token: Token          │  
+#                                       │balance: BigDecimal   │   
+#                                       │pol: BigDecimal       │  
+#                                       │tokens: TokenBalance[]│
+#                                       │timestamp: BigInt     │
+#                                       └──────────────────────┘
+
+
+# ┌──────────────────────────────────┐ 1            ┌─────────────────────┐
+# │Bond                              │◄─────┐       │BondDeposit          │
+# ├──────────────────────────────────┤      │       ├─────────────────────┤
+# │id: addressin-addressout-timestamp│      │       │id: txhash           │
+# │tokenIn: Token                    │      │       │tokenIn: Token       │
+# │tokenOut: Token                   │      │       │tokenOut: Token      │
+# │amountIn: BigDecimal              │      │       │amountIn: BigDecimal │
+# │amountOut: BigDecimal             │      │       │amountOut: BigDecimal│
+# │valueIn: BigDecimal               │      │       │valueIn: BigDecimal  │
+# │valueOut: BigDecimal              │      │       │valueOut: BigDecimal │
+# │debtRatio: BigInt                 │      └───────┤bond: Bond           │
+# │timestamp: BigInt                 │          1..*└─────────────────────┘
+# └──────────────────────────────────┘
+
+#Simple staking
+type SimpleStaking @entity {
+  id: ID!
+  stakedSupply: BigDecimal!
+  apy: BigDecimal!
+  index: BigDecimal!
+  nextEpochRebase: BigDecimal!
+}
+
+#Protocol metric
+type ProtocolMetric @entity {
+  id: ID!
+  circulatingSupply: BigDecimal!
+  totalSupply: BigDecimal!
+  price: BigDecimal!
+  marketCap: BigDecimal!
+  tvl: BigDecimal!
+  holders: BigDecimal!
+  runway: BigDecimal!
+}
+
+#Treasury
+type Treasury @entity {
+  id: ID!
+  marketValue: BigDecimal!
+  riskFreeValue: BigDecimal!
+}
+
+#Liquidity
+type Liquidity @entity {
+  id: ID!
+  token: Token!
+  balance: BigDecimal!
+  pol: BigDecimal!
+  tokens: [TokenBalance!]! @derivedFrom(field: "liquidity")
+}
+
+type TokenBalance @entity {
+  id: ID!
+  token: Token!
+  balance: BigDecimal!
+  value: BigDecimal!
+  treasury: Treasury!
+  isRiskFree: Boolean!
+  isLiquidity: Boolean!
+  liquidity: Liquidity
+  timestamp: BigInt!
+}
+
+type Token @entity {
+  id: ID!
+  ticker: String!
+  fullName: String!
+}
+
+#Bond
+type Bond @entity {
+  id: ID!
+  tokenIn: Token!
+  tokenOut: Token!
+  amountIn: BigDecimal!
+  amountOut: BigDecimal!
+  valueIn: BigDecimal!
+  valueOut: BigDecimal!
+  debtRatio: BigInt!
+  timestamp: BigInt!
+}
+
+type BondDeposit @entity {
+  id: ID!
+  tokenIn: Token!
+  tokenOut: Token!
+  amountIn: BigDecimal!
+  amountOut: BigDecimal!
+  valueIn: BigDecimal!
+  valueOut: BigDecimal!
+  bond: Bond!
+}
