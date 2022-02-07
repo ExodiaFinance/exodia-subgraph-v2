@@ -8,6 +8,7 @@ dataSources:
     source:
       address: "0x68f30FEd7a9132832d93fAE18dE717D6533edF97"
       abi: TreasuryTracker
+      startBlock: 30018654
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
@@ -18,9 +19,26 @@ dataSources:
       abis:
         - name: TreasuryTracker
           file: ./abis/TreasuryTracker.json
-      eventHandlers:
-        - event: OwnershipPulled(indexed address,indexed address)
-          handler: handleOwnershipPulled
-        - event: OwnershipPushed(indexed address,indexed address)
-          handler: handleOwnershipPushed
-      file: ./src/mapping.ts
+        - name: CirculatingSupply
+          file: ./abis/CirculatingSupply.json
+        - name: EXODERC20
+          file: ./abis/EXODERC20.json
+        - name: UniswapV2Pair
+          file: ./abis/UniswapV2Pair.json
+        - name: SEXODERC20
+          file: ./abis/SEXODERC20.json
+        - name: ExodStaking
+          file: ./abis/ExodStaking.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: BalancerVault
+          file: ./abis/BalancerVault.json
+        - name: WeightedPool
+          file: ./abis/WeightedPool.json
+        - name: PriceOracle
+          file: ./abis/PriceOracle.json
+        - name: WeightedPool2
+          file: ./abis/WeightedPool2.json
+      blockHandlers:
+        - handler: handleBlock
+      file: ./src/TreasuryTracker.ts

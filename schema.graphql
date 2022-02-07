@@ -79,7 +79,7 @@ type ProtocolMetric @entity {
   price: BigDecimal!
   marketCap: BigDecimal!
   tvl: BigDecimal!
-  holders: BigDecimal!
+  holders: BigInt!
   runway: BigDecimal!
 }
 
@@ -97,6 +97,7 @@ type Liquidity @entity {
   balance: BigDecimal!
   pol: BigDecimal!
   tokens: [TokenBalance!]! @derivedFrom(field: "liquidity")
+  timestamp: BigInt!
 }
 
 type TokenBalance @entity {
@@ -139,4 +140,9 @@ type BondDeposit @entity {
   valueIn: BigDecimal!
   valueOut: BigDecimal!
   bond: Bond!
+}
+
+#daily timestamp tracking
+type _Aux @entity {
+  id: ID!
 }
