@@ -1,4 +1,4 @@
-import { BigDecimal, Address, log, BigInt } from "@graphprotocol/graph-ts"
+import { BigDecimal, Address, log, BigInt, bigDecimal } from "@graphprotocol/graph-ts"
 import { ProtocolMetric } from "../../generated/schema"
 import { CirculatingSupply } from "../../generated/TreasuryTracker/CirculatingSupply"
 import { EXODERC20 } from "../../generated/TreasuryTracker/EXODERC20"
@@ -8,11 +8,7 @@ import { CIRCULATING_SUPPLY_CONTRACT, EXOD_ERC20_CONTRACT, EXOD_STAKING_CONTRACT
 import { getExodPrice, toDecimal } from "../utils/helpers"
 
 export function updateProtocolMetric(dayTimestamp: string): void {
-  let protocolMetric = ProtocolMetric.load(dayTimestamp)
-  if (!protocolMetric) {
-   protocolMetric = new ProtocolMetric(dayTimestamp)
-  }
-
+  const protocolMetric = loadOrCreateProtocolMetric(dayTimestamp)
   const exodPrice = getExodPrice()
 
   protocolMetric.circulatingSupply = getCirculatingSupply()
@@ -20,8 +16,22 @@ export function updateProtocolMetric(dayTimestamp: string): void {
   protocolMetric.price = exodPrice
   protocolMetric.marketCap = protocolMetric.totalSupply.times(protocolMetric.price)
   protocolMetric.tvl = getTVL(exodPrice)
-  protocolMetric.holders = BigInt.fromU32(0)
   protocolMetric.save()
+}
+
+function loadOrCreateProtocolMetric(timestamp: string): ProtocolMetric {
+  let protocolMetric = ProtocolMetric.load(timestamp)
+  if (!protocolMetric) {
+   protocolMetric = new ProtocolMetric(timestamp)
+
+   protocolMetric.circulatingSupply = BigDecimal.zero()
+   protocolMetric.totalSupply = BigDecimal.zero()
+   protocolMetric.price = BigDecimal.zero()
+   protocolMetric.marketCap = BigDecimal.zero()
+   protocolMetric.holders = BigInt.zero()
+   protocolMetric.tvl = BigDecimal.zero()
+  }
+  return protocolMetric
 }
 
 function getRunway(dayTimestamp: string, rfv: BigDecimal): BigDecimal {
@@ -61,10 +71,7 @@ export function getIndex(): BigDecimal {
 }
 
 export function updateRunway(timestamp: string, rfv: BigDecimal): void {
-  let protocolMetric = ProtocolMetric.load(timestamp)
-  if (!protocolMetric) {
-    protocolMetric = new ProtocolMetric(timestamp)
-  }
+  const protocolMetric = loadOrCreateProtocolMetric(timestamp)
   protocolMetric.runway = getRunway(timestamp, rfv)
   protocolMetric.save()
 }

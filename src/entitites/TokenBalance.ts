@@ -10,10 +10,22 @@ import { getExodPrice, toDecimal } from "../utils/helpers"
 import { priceMaps } from "../utils/priceMap"
 import { getIndex, updateRunway } from "./ProtocolMetric"
 import { loadOrCreateToken } from "./Token"
+import { loadOrCreateTreasury } from "./Treasury"
 
-class TokenBalances {
-  balances: BigDecimal[];
-  values: BigDecimal[];
+export function loadOrCreateTokenBalance(id: string): TokenBalance {
+  let tokenBalance = TokenBalance.load(id)
+  if (!tokenBalance) {
+    tokenBalance = new TokenBalance(id)
+    tokenBalance.token = ''
+    tokenBalance.balance = BigDecimal.zero()
+    tokenBalance.value = BigDecimal.zero()
+    tokenBalance.treasury = ''
+    tokenBalance.isRiskFree = false
+    tokenBalance.isLiquidity = false
+    tokenBalance.liquidity = ''
+    tokenBalance.timestamp = BigInt.zero()
+  }
+  return tokenBalance
 }
 
 export function updateTokenBalances(
@@ -22,30 +34,20 @@ export function updateTokenBalances(
   riskFree: boolean = false,
   balances: BigDecimal[] = [],
   liquidityId: string = '',
-): TokenBalances {
-  const tokenBalances: TokenBalances = {
-    balances: [],
-    values: [],
-  }
-
+): void {
   for (let i = 0; i < tokens.length; i++) {
     if (balances.length) {
-      const tokenBalance = updateTokenBalance(
+      updateTokenBalance(
         tokens[i],
         timestamp,
         riskFree,
         balances[i],
         liquidityId,
       )
-      tokenBalances.balances.push(tokenBalance.balance)
-      tokenBalances.values.push(tokenBalance.value)
     } else {
-      const tokenBalance = updateTokenBalance(tokens[i], timestamp, riskFree, BigDecimal.zero(), liquidityId)
-      tokenBalances.balances.push(tokenBalance.balance)
-      tokenBalances.values.push(tokenBalance.value)
+      updateTokenBalance(tokens[i], timestamp, riskFree, BigDecimal.zero(), liquidityId)
     }
   }
-  return tokenBalances
 }
 
 export function updateTokenBalance(
@@ -54,15 +56,12 @@ export function updateTokenBalance(
   riskFree: boolean = false,
   balance: BigDecimal = BigDecimal.zero(),
   liquidityId: string = '',
-): TokenBalance {
+): void {
   const addressString = address.toHexString()
     const token = loadOrCreateToken(addressString)
     const id = !!liquidityId ? `${addressString}-${timestamp}-${liquidityId}` : `${addressString}-${timestamp}`
 
-    let tokenBalance = TokenBalance.load(id)
-    if (!tokenBalance) {
-      tokenBalance = new TokenBalance(id)
-    }
+    const tokenBalance = loadOrCreateTokenBalance(id)
 
     if (balance.gt(BigDecimal.zero())) {
       tokenBalance.balance = balance
@@ -82,12 +81,7 @@ export function updateTokenBalance(
     tokenBalance.token = token.id
     tokenBalance.save()
 
-    let treasury = Treasury.load(timestamp)
-    if (!treasury) {
-      treasury = new Treasury(timestamp)
-      treasury.marketValue = BigDecimal.zero()
-      treasury.riskFreeValue = BigDecimal.zero()
-    }
+    const treasury = loadOrCreateTreasury(timestamp)
 
     if (riskFree) {
       treasury.riskFreeValue = treasury.riskFreeValue.plus(tokenBalance.value)
@@ -97,8 +91,6 @@ export function updateTokenBalance(
       treasury.marketValue = treasury.marketValue.plus(tokenBalance.value)
     }
     treasury.save()
-
-    return tokenBalance
 }
 
 function getPrice(token: Address): BigDecimal {
