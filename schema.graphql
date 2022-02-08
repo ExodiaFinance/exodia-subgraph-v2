@@ -88,6 +88,8 @@ type Treasury @entity {
   id: ID!
   marketValue: BigDecimal!
   riskFreeValue: BigDecimal!
+  liquidities: [Liquidity!]! @derivedFrom(field: "treasury")
+  tokenBalances: [TokenBalance!]! @derivedFrom(field: "treasury")
 }
 
 #Liquidity
@@ -96,6 +98,7 @@ type Liquidity @entity {
   token: Token!
   balance: BigDecimal!
   pol: BigDecimal!
+  treasury: Treasury!
   tokens: [TokenBalance!]! @derivedFrom(field: "liquidity")
   timestamp: BigInt!
 }
@@ -140,9 +143,4 @@ type BondDeposit @entity {
   valueIn: BigDecimal!
   valueOut: BigDecimal!
   bond: Bond!
-}
-
-#daily timestamp tracking
-type _Aux @entity {
-  id: ID!
 }
