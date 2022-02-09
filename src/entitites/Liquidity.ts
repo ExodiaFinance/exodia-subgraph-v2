@@ -89,7 +89,7 @@ export function updateUniLiquidities(tokens: Address[], dayTimestamp: string): v
   }
 }
 
-function updateUniLiquidity(address: Address, dayTimestamp: string): void {
+function updateUniLiquidity(address: Address, dayTimestamp: string, balance: BigDecimal = BigDecimal.zero()): void {
   const addressString = address.toHexString()
   const token = loadOrCreateToken(addressString)
 
@@ -102,7 +102,11 @@ function updateUniLiquidity(address: Address, dayTimestamp: string): void {
   const decimals = tokenContract.decimals()
   const totalSupply = toDecimal(tokenContract.totalSupply(), decimals)
   liquidity.token = token.id
-  liquidity.balance = toDecimal(treasuryTrackerContract.balance(address), decimals)
+  if (balance.gt(BigDecimal.zero())) {
+    liquidity.balance = balance
+  } else {
+    liquidity.balance = toDecimal(treasuryTrackerContract.balance(address), decimals)
+  }
   liquidity.pol = liquidity.balance.div(totalSupply).times(BigDecimal.fromString("100"))
   liquidity.timestamp = BigInt.fromString(dayTimestamp)
   liquidity.treasury = dayTimestamp

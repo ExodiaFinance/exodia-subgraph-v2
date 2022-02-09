@@ -1,11 +1,12 @@
-import { BigDecimal, Address, log, BigInt, bigDecimal } from "@graphprotocol/graph-ts"
-import { ProtocolMetric } from "../../generated/schema"
+import { BigDecimal, Address, log } from "@graphprotocol/graph-ts"
+import { Exodian, ProtocolMetric } from "../../generated/schema"
 import { CirculatingSupply } from "../../generated/TreasuryTracker/CirculatingSupply"
 import { EXODERC20 } from "../../generated/TreasuryTracker/EXODERC20"
 import { ExodStaking } from "../../generated/TreasuryTracker/ExodStaking"
 import { SEXODERC20 } from "../../generated/TreasuryTracker/SEXODERC20"
 import { CIRCULATING_SUPPLY_CONTRACT, EXOD_ERC20_CONTRACT, EXOD_STAKING_CONTRACT, SEXOD_ERC20_CONTRACT } from "../utils/constants"
 import { getExodPrice, toDecimal } from "../utils/helpers"
+import { loadOrCreateHolders } from "./Holders"
 
 export function updateProtocolMetric(dayTimestamp: string): void {
   const protocolMetric = loadOrCreateProtocolMetric(dayTimestamp)
@@ -19,7 +20,7 @@ export function updateProtocolMetric(dayTimestamp: string): void {
   protocolMetric.save()
 }
 
-function loadOrCreateProtocolMetric(timestamp: string): ProtocolMetric {
+export function loadOrCreateProtocolMetric(timestamp: string): ProtocolMetric {
   let protocolMetric = ProtocolMetric.load(timestamp)
   if (!protocolMetric) {
    protocolMetric = new ProtocolMetric(timestamp)
@@ -28,13 +29,13 @@ function loadOrCreateProtocolMetric(timestamp: string): ProtocolMetric {
    protocolMetric.totalSupply = BigDecimal.zero()
    protocolMetric.price = BigDecimal.zero()
    protocolMetric.marketCap = BigDecimal.zero()
-   protocolMetric.holders = BigInt.zero()
    protocolMetric.tvl = BigDecimal.zero()
+   protocolMetric.holders = loadOrCreateHolders().totalHolders
   }
   return protocolMetric
 }
 
-function getRunway(dayTimestamp: string, rfv: BigDecimal): BigDecimal {
+function getRunway(rfv: BigDecimal): BigDecimal {
   const stakingContract = ExodStaking.bind(Address.fromString(EXOD_STAKING_CONTRACT))
   const sExodContract = SEXODERC20.bind(Address.fromString(SEXOD_ERC20_CONTRACT))
   const sExodSupply = toDecimal(sExodContract.circulatingSupply(), 9)
@@ -72,6 +73,12 @@ export function getIndex(): BigDecimal {
 
 export function updateRunway(timestamp: string, rfv: BigDecimal): void {
   const protocolMetric = loadOrCreateProtocolMetric(timestamp)
-  protocolMetric.runway = getRunway(timestamp, rfv)
+  protocolMetric.runway = getRunway(rfv)
   protocolMetric.save()
+}
+
+export function updateHolders(sender: Exodian, receiver: Exodian, timestamp: string): void {
+  const protocolMetric = loadOrCreateProtocolMetric(timestamp)
+
+  
 }

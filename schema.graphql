@@ -144,3 +144,16 @@ type BondDeposit @entity {
   valueOut: BigDecimal!
   bond: Bond!
 }
+
+type Exodian @entity {
+  id: ID!
+  exodBalance: BigDecimal!
+  sExodBalance: BigDecimal!
+  wsExodBalance: BigDecimal!
+  heldSince: BigInt!
+}
+
+type Holders @entity {
+  id: ID!
+  totalHolders: BigInt!
+}
