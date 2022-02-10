@@ -1,4 +1,4 @@
-# UML diagram
+# High level overview
 # ┌────────────────────────┐
 # │SimpleStaking           │
 # ├────────────────────────┤
@@ -68,7 +68,7 @@ type SimpleStaking @entity {
   stakedSupply: BigDecimal!
   apy: BigDecimal!
   index: BigDecimal!
-  nextEpochRebase: BigDecimal!
+  rebaseRate: BigDecimal!
 }
 
 #Protocol metric
@@ -103,6 +103,7 @@ type Liquidity @entity {
   timestamp: BigInt!
 }
 
+# TokenBalance
 type TokenBalance @entity {
   id: ID!
   token: Token!
@@ -115,6 +116,7 @@ type TokenBalance @entity {
   timestamp: BigInt!
 }
 
+#Token
 type Token @entity {
   id: ID!
   ticker: String!
@@ -134,6 +136,7 @@ type Bond @entity {
   timestamp: BigInt!
 }
 
+#BondDeposit
 type BondDeposit @entity {
   id: ID!
   tokenIn: Token!
@@ -145,6 +148,7 @@ type BondDeposit @entity {
   bond: Bond!
 }
 
+#Exodian
 type Exodian @entity {
   id: ID!
   exodBalance: BigDecimal!
@@ -153,7 +157,8 @@ type Exodian @entity {
   heldSince: BigInt!
 }
 
-type Holders @entity {
+#Holders
+type HolderCount @entity {
   id: ID!
   totalHolders: BigInt!
 }

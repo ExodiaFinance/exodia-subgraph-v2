@@ -1,25 +1,26 @@
 import { Address, BigDecimal, BigInt } from "@graphprotocol/graph-ts";
+import { ERC20 } from "../../generated/TreasuryTracker/ERC20";
 import { Transfer } from "../../generated/TreasuryTracker/EXODERC20";
 import { loadOrCreateExodian } from "../entitites/Exodian";
-import { loadOrCreateHolders } from "../entitites/Holders";
+import { loadOrCreateHolderCount } from "../entitites/HolderCount";
 import { EXOD_ERC20_CONTRACT } from "../utils/constants";
 import { toDecimal } from "../utils/helpers";
 
 export function handleTransfer(transfer: Transfer): void {
-  const amount = toDecimal(transfer.params.value, 9)
+  const exodERC20 = ERC20.bind(Address.fromString(EXOD_ERC20_CONTRACT))
 
   if (transfer.params.from.notEqual(Address.zero())
     && transfer.params.from.notEqual(Address.fromHexString(EXOD_ERC20_CONTRACT))
   ) {
     const sender = loadOrCreateExodian(transfer.params.from.toHexString())
-    sender.exodBalance = sender.exodBalance.minus(amount)
+    sender.exodBalance = toDecimal(exodERC20.balanceOf(transfer.params.from), 9)
     if (sender.exodBalance.le(BigDecimal.zero())
       && sender.sExodBalance.le(BigDecimal.zero())
       && sender.wsExodBalance.le(BigDecimal.zero())
     ) {
-      const holders = loadOrCreateHolders()
-      holders.totalHolders = holders.totalHolders.minus(BigInt.fromU32(1))
-      holders.save()
+      const holderCount = loadOrCreateHolderCount()
+      holderCount.totalHolders = holderCount.totalHolders.minus(BigInt.fromU32(1))
+      holderCount.save()
       sender.heldSince = transfer.block.timestamp
     }
     sender.save()
@@ -31,12 +32,12 @@ export function handleTransfer(transfer: Transfer): void {
       && receiver.sExodBalance.le(BigDecimal.zero())
       && receiver.wsExodBalance.le(BigDecimal.zero())
     ) {
-      const holders = loadOrCreateHolders()
-      holders.totalHolders = holders.totalHolders.plus(BigInt.fromU32(1))
-      holders.save()
+      const holderCount = loadOrCreateHolderCount()
+      holderCount.totalHolders = holderCount.totalHolders.plus(BigInt.fromU32(1))
+      holderCount.save()
       receiver.heldSince = transfer.block.timestamp
     }
-    receiver.exodBalance = receiver.exodBalance.plus(amount)
+    receiver.exodBalance = toDecimal(exodERC20.balanceOf(transfer.params.to), 9)
     receiver.save()
   }
 }

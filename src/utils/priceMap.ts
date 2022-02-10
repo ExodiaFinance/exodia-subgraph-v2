@@ -1,4 +1,5 @@
 class PriceMap {
+  name: string
   tokenAddress: string
   isExod: boolean
   iswsExod: boolean
@@ -11,6 +12,7 @@ class PriceMap {
 
 export const priceMaps: PriceMap[] = [
   {
+    name: "EXOD",
     tokenAddress: "0x3b57f3FeAaF1e8254ec680275Ee6E7727C7413c7",
     isExod: true,
     iswsExod: false,
@@ -21,6 +23,7 @@ export const priceMaps: PriceMap[] = [
     priceDecimals: 0,
   },
   {
+    name: "wsEXOD",
     tokenAddress: "0xe992C5Abddb05d86095B18a158251834D616f0D1",
     isExod: false,
     iswsExod: true,
@@ -31,6 +34,7 @@ export const priceMaps: PriceMap[] = [
     priceDecimals: 0,
   },
   {
+    name: "DAI",
     tokenAddress: "0x8d11ec38a3eb5e956b052f67da8bdc9bef8abf3e",
     isExod: false,
     iswsExod: false,
@@ -41,6 +45,7 @@ export const priceMaps: PriceMap[] = [
     priceDecimals: 0,
   },
   {
+    name: "MAI",
     tokenAddress: "0xfb98b335551a418cd0737375a2ea0ded62ea213b",
     isExod: false,
     iswsExod: false,
@@ -51,6 +56,7 @@ export const priceMaps: PriceMap[] = [
     priceDecimals: 0,
   },
   {
+    name: "wFTM",
     tokenAddress: "0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83",
     isExod: false,
     iswsExod: false,
@@ -61,6 +67,7 @@ export const priceMaps: PriceMap[] = [
     priceDecimals: 8
   },
   {
+    name: "gOHM",
     tokenAddress: "0x91fa20244fb509e8289ca630e5db3e9166233fdc",
     isExod: false,
     iswsExod: false,
@@ -71,6 +78,7 @@ export const priceMaps: PriceMap[] = [
     priceDecimals: 8
   },
   {
+    name: "fBEETS",
     tokenAddress: "0xfcef8a994209d6916EB2C86cDD2AFD60Aa6F54b1",
     isExod: false,
     iswsExod: false,
@@ -81,6 +89,7 @@ export const priceMaps: PriceMap[] = [
     priceDecimals: 8
   },
   {
+    name: "BEETS",
     tokenAddress: "0xF24Bcf4d1e507740041C9cFd2DddB29585aDCe1e",
     isExod: false,
     iswsExod: false,
@@ -91,6 +100,7 @@ export const priceMaps: PriceMap[] = [
     priceDecimals: 18,
   },
   {
+    name: "USDC",
     tokenAddress: "0x04068DA6C83AFCFA0e13ba15A6696662335D5B75",
     isExod: false,
     iswsExod: false,

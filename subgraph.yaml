@@ -8,7 +8,7 @@ dataSources:
     source:
       address: "0x68f30FEd7a9132832d93fAE18dE717D6533edF97"
       abi: TreasuryTracker
-      startBlock: 30018654
+      startBlock: 20057550
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
@@ -39,6 +39,8 @@ dataSources:
           file: ./abis/PriceOracle.json
         - name: WeightedPool2
           file: ./abis/WeightedPool2.json
+        - name: BeethovenxMasterChef
+          file: ./abis/BeethovenxMasterChef.json
       blockHandlers:
         - handler: handleBlock
       file: ./src/mappings/TreasuryTracker.ts

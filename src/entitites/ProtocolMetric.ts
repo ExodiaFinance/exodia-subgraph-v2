@@ -1,4 +1,4 @@
-import { BigDecimal, Address, log } from "@graphprotocol/graph-ts"
+import { BigDecimal, Address, log, BigInt } from "@graphprotocol/graph-ts"
 import { Exodian, ProtocolMetric } from "../../generated/schema"
 import { CirculatingSupply } from "../../generated/TreasuryTracker/CirculatingSupply"
 import { EXODERC20 } from "../../generated/TreasuryTracker/EXODERC20"
@@ -6,7 +6,7 @@ import { ExodStaking } from "../../generated/TreasuryTracker/ExodStaking"
 import { SEXODERC20 } from "../../generated/TreasuryTracker/SEXODERC20"
 import { CIRCULATING_SUPPLY_CONTRACT, EXOD_ERC20_CONTRACT, EXOD_STAKING_CONTRACT, SEXOD_ERC20_CONTRACT } from "../utils/constants"
 import { getExodPrice, toDecimal } from "../utils/helpers"
-import { loadOrCreateHolders } from "./Holders"
+import { loadOrCreateHolderCount } from "./HolderCount"
 
 export function updateProtocolMetric(dayTimestamp: string): void {
   const protocolMetric = loadOrCreateProtocolMetric(dayTimestamp)
@@ -30,7 +30,8 @@ export function loadOrCreateProtocolMetric(timestamp: string): ProtocolMetric {
    protocolMetric.price = BigDecimal.zero()
    protocolMetric.marketCap = BigDecimal.zero()
    protocolMetric.tvl = BigDecimal.zero()
-   protocolMetric.holders = loadOrCreateHolders().totalHolders
+   protocolMetric.holders = loadOrCreateHolderCount().totalHolders
+   protocolMetric.runway = BigDecimal.zero()
   }
   return protocolMetric
 }
@@ -75,10 +76,4 @@ export function updateRunway(timestamp: string, rfv: BigDecimal): void {
   const protocolMetric = loadOrCreateProtocolMetric(timestamp)
   protocolMetric.runway = getRunway(rfv)
   protocolMetric.save()
-}
-
-export function updateHolders(sender: Exodian, receiver: Exodian, timestamp: string): void {
-  const protocolMetric = loadOrCreateProtocolMetric(timestamp)
-
-  
 }

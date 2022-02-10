@@ -23,9 +23,15 @@ export function loadOrCreateLiquidity(id: string): Liquidity {
   return liquidity
 }
 
-export function updateBptLiquidities(tokens: Address[], dayTimestamp: string): void {
-  for (let i = 0; i < tokens.length; i ++) {
-    updateBptLiquidity(tokens[i], dayTimestamp)
+export function updateBptLiquidities(tokens: Address[], dayTimestamp: string, balances: BigDecimal[] = []): void {
+  if (!balances) {
+    for (let i = 0; i < tokens.length; i ++) {
+      updateBptLiquidity(tokens[i], dayTimestamp)
+    }
+  } else {
+    for (let i = 0; i < tokens.length; i ++) {
+      updateBptLiquidity(tokens[i], dayTimestamp, balances[i])
+    }
   }
 }
 
@@ -53,7 +59,6 @@ function updateBptLiquidity(address: Address, dayTimestamp: string, balance: Big
   liquidity.pol = liquidity.balance.div(totalSupply).times(BigDecimal.fromString("100"))
   liquidity.treasury = dayTimestamp
   liquidity.timestamp = BigInt.fromString(dayTimestamp)
-  liquidity.save()
 
   const poolId = tokenContract.try_getPoolId()
   //fetch underlying liquidity for fBeets
@@ -64,11 +69,14 @@ function updateBptLiquidity(address: Address, dayTimestamp: string, balance: Big
       updateTokenBalance(address, dayTimestamp, false, BigDecimal.zero(), id)
       return
     } else {
+      updateTokenBalance(address, dayTimestamp, false)
       const vestingTokenBalance = getVestingTokenBalance(vestingToken.value, address, liquidity.balance)
       updateBptLiquidity(vestingToken.value, dayTimestamp, vestingTokenBalance)
       return
     }
   }
+  
+  liquidity.save()
 
   const poolTokens = balancerVaultContract.getPoolTokens(poolId.value)
   const poolTokensAddresses = poolTokens.value0
@@ -83,9 +91,15 @@ function updateBptLiquidity(address: Address, dayTimestamp: string, balance: Big
   updateTokenBalances(poolTokensAddresses, dayTimestamp, false, ownedPoolTokensBalances, id)
 }
 
-export function updateUniLiquidities(tokens: Address[], dayTimestamp: string): void {
-  for (let i = 0; i < tokens.length; i ++) {
-    updateUniLiquidity(tokens[i], dayTimestamp)
+export function updateUniLiquidities(tokens: Address[], dayTimestamp: string, balances: BigDecimal[] = []): void {
+  if (!balances) {
+    for (let i = 0; i < tokens.length; i ++) {
+      updateUniLiquidity(tokens[i], dayTimestamp)
+    }
+  } else {
+    for (let i = 0; i < tokens.length; i ++) {
+      updateUniLiquidity(tokens[i], dayTimestamp, balances[i])
+    }
   }
 }
 
