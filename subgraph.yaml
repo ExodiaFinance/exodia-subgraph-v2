@@ -8,7 +8,7 @@ dataSources:
     source:
       address: "0x68f30FEd7a9132832d93fAE18dE717D6533edF97"
       abi: TreasuryTracker
-      startBlock: 20057550
+      startBlock: 20104750
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5

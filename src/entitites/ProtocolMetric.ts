@@ -40,12 +40,15 @@ function getRunway(rfv: BigDecimal): BigDecimal {
   const stakingContract = ExodStaking.bind(Address.fromString(EXOD_STAKING_CONTRACT))
   const sExodContract = SEXODERC20.bind(Address.fromString(SEXOD_ERC20_CONTRACT))
   const sExodSupply = toDecimal(sExodContract.circulatingSupply(), 9)
-  const rebaseRate = toDecimal(stakingContract.epoch().value3, 9)
+  if (sExodSupply.gt(BigDecimal.zero())) {
+    const rebaseRate = toDecimal(stakingContract.epoch().value3, 9)
     .div(sExodSupply)
-  const rebases = Math.log( parseFloat(rfv.div(sExodSupply).toString()) ) / Math.log( 1 + parseFloat(rebaseRate.toString()) )
-  const runway = rebases * 28800 * 0.9 / 86400
-  log.debug("rebases: {}, runway: {}", [rebases.toString(), runway.toString()])
-  return BigDecimal.fromString(runway.toString())
+    const rebases = Math.log( parseFloat(rfv.div(sExodSupply).toString()) ) / Math.log( 1 + parseFloat(rebaseRate.toString()) )
+    const runway = rebases * 28800 * 0.9 / 86400
+    return BigDecimal.fromString(runway.toString())
+  } else {
+    return BigDecimal.zero()
+  }
 }
 
 function getTVL(exodPrice: BigDecimal): BigDecimal {

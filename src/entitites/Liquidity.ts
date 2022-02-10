@@ -24,19 +24,19 @@ export function loadOrCreateLiquidity(id: string): Liquidity {
 }
 
 export function updateBptLiquidities(tokens: Address[], dayTimestamp: string, balances: BigDecimal[] = []): void {
-  if (!balances) {
+  if (balances.length) {
     for (let i = 0; i < tokens.length; i ++) {
-      updateBptLiquidity(tokens[i], dayTimestamp)
+      updateBptLiquidity(tokens[i], dayTimestamp, balances[i], false)
     }
   } else {
     for (let i = 0; i < tokens.length; i ++) {
-      updateBptLiquidity(tokens[i], dayTimestamp, balances[i])
+      updateBptLiquidity(tokens[i], dayTimestamp)
     }
   }
 }
 
 
-function updateBptLiquidity(address: Address, dayTimestamp: string, balance: BigDecimal = BigDecimal.zero()): void {
+function updateBptLiquidity(address: Address, dayTimestamp: string, balance: BigDecimal = BigDecimal.zero(), fetchBalance: boolean = true): void {
   const addressString = address.toHexString()
   const token = loadOrCreateToken(addressString)
 
@@ -50,7 +50,7 @@ function updateBptLiquidity(address: Address, dayTimestamp: string, balance: Big
   const decimals = tokenContract.decimals()
   const totalSupply = toDecimal(tokenContract.totalSupply(), decimals)
 
-  if (balance.gt(BigDecimal.zero())) {
+  if (!fetchBalance) {
     liquidity.balance = balance
   } else {
     liquidity.balance = toDecimal(treasuryTrackerContract.balance(address), decimals)
@@ -92,18 +92,18 @@ function updateBptLiquidity(address: Address, dayTimestamp: string, balance: Big
 }
 
 export function updateUniLiquidities(tokens: Address[], dayTimestamp: string, balances: BigDecimal[] = []): void {
-  if (!balances) {
+  if (balances.length) {
     for (let i = 0; i < tokens.length; i ++) {
-      updateUniLiquidity(tokens[i], dayTimestamp)
+      updateUniLiquidity(tokens[i], dayTimestamp, balances[i], false)
     }
   } else {
     for (let i = 0; i < tokens.length; i ++) {
-      updateUniLiquidity(tokens[i], dayTimestamp, balances[i])
+      updateUniLiquidity(tokens[i], dayTimestamp)
     }
   }
 }
 
-function updateUniLiquidity(address: Address, dayTimestamp: string, balance: BigDecimal = BigDecimal.zero()): void {
+function updateUniLiquidity(address: Address, dayTimestamp: string, balance: BigDecimal = BigDecimal.zero(), fetchBalance: boolean = true): void {
   const addressString = address.toHexString()
   const token = loadOrCreateToken(addressString)
 
@@ -116,7 +116,7 @@ function updateUniLiquidity(address: Address, dayTimestamp: string, balance: Big
   const decimals = tokenContract.decimals()
   const totalSupply = toDecimal(tokenContract.totalSupply(), decimals)
   liquidity.token = token.id
-  if (balance.gt(BigDecimal.zero())) {
+  if (!fetchBalance) {
     liquidity.balance = balance
   } else {
     liquidity.balance = toDecimal(treasuryTrackerContract.balance(address), decimals)
@@ -132,6 +132,20 @@ function updateUniLiquidity(address: Address, dayTimestamp: string, balance: Big
   const token0Decimals = getDecimals(token0)
   const token1Decimals = getDecimals(token1)
 
-  updateTokenBalance(token0, dayTimestamp, false, toDecimal(reserves.value0, token0Decimals).times(liquidity.pol).div(BigDecimal.fromString("100")), id)
-  updateTokenBalance(token1, dayTimestamp, false, toDecimal(reserves.value1, token1Decimals).times(liquidity.pol).div(BigDecimal.fromString("100")), id)
+  updateTokenBalance(
+    token0,
+    dayTimestamp,
+    false,
+    toDecimal(reserves.value0, token0Decimals).times(liquidity.pol).div(BigDecimal.fromString("100")),
+    id,
+    false
+  )
+  updateTokenBalance(
+    token1,
+    dayTimestamp,
+    false,
+    toDecimal(reserves.value1, token1Decimals).times(liquidity.pol).div(BigDecimal.fromString("100")),
+    id,
+    false
+  )
 }

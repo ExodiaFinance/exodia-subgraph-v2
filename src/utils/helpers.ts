@@ -25,12 +25,15 @@ export function getExodPrice(): BigDecimal {
   const pair = UniswapV2Pair.bind(Address.fromString(SLP_EXODDAI_PAIR))
 
   const reserves = pair.getReserves()
-  const reserve0 = reserves.value0.toBigDecimal()
-  const reserve1 = reserves.value1.toBigDecimal()
+  const reserve0 = toDecimal(reserves.value0, 9)
+  const reserve1 = toDecimal(reserves.value1, 18)
 
-  const exodPrice = reserve1.div(reserve0).div(BigDecimal.fromString('1e9'))
-
-  return exodPrice
+  if (reserve0.gt(BigDecimal.zero())) {
+    const exodPrice = reserve1.div(reserve0)
+    return exodPrice
+  } else {
+    return BigDecimal.zero()
+  }
 }
 
 export function getVestingTokenBalance(vestingToken: Address, address: Address, tokenBalance: BigDecimal): BigDecimal {
@@ -43,7 +46,6 @@ export function getVestingTokenBalance(vestingToken: Address, address: Address, 
   const totalTokens = toDecimal(tokenERC20.totalSupply(), tokenDecimals)
 
   const exchangeRate = totalVestingTokens.div(totalTokens)
-
   const vestingTokenBalance = tokenBalance.times(exchangeRate)
   return vestingTokenBalance
 }

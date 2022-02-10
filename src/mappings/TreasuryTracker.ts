@@ -1,4 +1,4 @@
-import { ethereum } from '@graphprotocol/graph-ts'
+import { BigInt, ethereum } from '@graphprotocol/graph-ts'
 import { Treasury } from '../../generated/schema'
 import { dayFromTimestamp } from '../utils/helpers'
 import { updateTreasury } from '../entitites/Treasury'

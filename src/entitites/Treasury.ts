@@ -1,4 +1,4 @@
-import { Address, BigDecimal, BigInt, Bytes } from "@graphprotocol/graph-ts"
+import { Address, BigDecimal, BigInt, Bytes, log } from "@graphprotocol/graph-ts"
 import { Treasury } from "../../generated/schema"
 import { TreasuryTracker } from "../../generated/TreasuryTracker/TreasuryTracker"
 import { BEETHOVEN_MASTERCHEF_CONTRACT, DAO_WALLET, TREASURY_CONTRACT, TREASURY_TRACKER_CONTRACT } from "../utils/constants"
@@ -27,17 +27,18 @@ export function updateTreasury(dayTimestamp: string, blockNumber: BigInt): void 
     const uniLp = getUniLps(blockNumber)
     const riskFreeAsset = getRiskFreeAssets(blockNumber)
     const assetsWithRisks = getAssetsWithRisks(blockNumber)
+    log.debug("bpt addresses: {}, uniLp addresses: {}", [`${bpt.addresses}`, `${uniLp.addresses}`])
     
-    if (!!bpt.addresses) {
+    if (bpt.addresses.length) {
       updateBptLiquidities(bpt.addresses, dayTimestamp, bpt.balances)
     }
-    if (!!uniLp.addresses) {
+    if (uniLp.addresses.length) {
       updateUniLiquidities(uniLp.addresses, dayTimestamp, uniLp.balances)
     }
-    if (!!riskFreeAsset.addresses) {
+    if (riskFreeAsset.addresses.length) {
       updateTokenBalances(riskFreeAsset.addresses, dayTimestamp, true, riskFreeAsset.balances)
     }
-    if (!!assetsWithRisks.addresses) {
+    if (assetsWithRisks.addresses.length) {
       updateTokenBalances(assetsWithRisks.addresses, dayTimestamp, false, assetsWithRisks.balances)
     }
   }

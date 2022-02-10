@@ -43,6 +43,7 @@ export function updateTokenBalances(
         riskFree,
         balances[i],
         liquidityId,
+        false
       )
     } else {
       updateTokenBalance(tokens[i], timestamp, riskFree, BigDecimal.zero(), liquidityId)
@@ -56,6 +57,7 @@ export function updateTokenBalance(
   riskFree: boolean = false,
   balance: BigDecimal = BigDecimal.zero(),
   liquidityId: string = '',
+  fetchBalance: boolean = true
 ): void {
   const addressString = address.toHexString()
     const token = loadOrCreateToken(addressString)
@@ -63,7 +65,7 @@ export function updateTokenBalance(
 
     const tokenBalance = loadOrCreateTokenBalance(id)
 
-    if (balance.gt(BigDecimal.zero())) {
+    if (!fetchBalance) {
       tokenBalance.balance = balance
     } else {
       const tokenERC20 = ERC20.bind(address)
