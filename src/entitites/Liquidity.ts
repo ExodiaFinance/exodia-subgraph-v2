@@ -8,7 +8,7 @@ import { WeightedPool } from "../../generated/TreasuryTracker/WeightedPool"
 import { TREASURY_TRACKER_CONTRACT, BALANCERVAULT_CONTRACT } from "../utils/constants"
 import { getDecimals, getVestingTokenBalance, toDecimal } from "../utils/helpers"
 import { loadOrCreateToken } from "./Token"
-import { updateTokenBalance, updateTokenBalances } from "./TokenBalance"
+import { TokenValue, updateTokenBalance, updateTokenBalances } from "./TokenBalance"
 
 export function loadOrCreateLiquidity(id: string): Liquidity {
   let liquidity = Liquidity.load(id)
@@ -23,20 +23,30 @@ export function loadOrCreateLiquidity(id: string): Liquidity {
   return liquidity
 }
 
-export function updateBptLiquidities(tokens: Address[], dayTimestamp: string, balances: BigDecimal[] = []): void {
+export function updateBptLiquidities(tokens: Address[], dayTimestamp: string, balances: BigDecimal[] = []): TokenValue {
+  const tokenValues: TokenValue = {
+    riskFreeValue: BigDecimal.zero(),
+    riskyValue: BigDecimal.zero()
+  }
   if (balances.length) {
     for (let i = 0; i < tokens.length; i ++) {
-      updateBptLiquidity(tokens[i], dayTimestamp, balances[i], false)
+      const _tokenValues = updateBptLiquidity(tokens[i], dayTimestamp, balances[i], false)
+      tokenValues.riskFreeValue = tokenValues.riskFreeValue.plus(_tokenValues.riskFreeValue)
+      tokenValues.riskyValue = tokenValues.riskyValue.plus(_tokenValues.riskyValue)
     }
   } else {
     for (let i = 0; i < tokens.length; i ++) {
-      updateBptLiquidity(tokens[i], dayTimestamp)
+      const _tokenValues = updateBptLiquidity(tokens[i], dayTimestamp)
+      tokenValues.riskFreeValue = tokenValues.riskFreeValue.plus(_tokenValues.riskFreeValue)
+      tokenValues.riskyValue = tokenValues.riskyValue.plus(_tokenValues.riskyValue)
     }
   }
+
+  return tokenValues
 }
 
 
-function updateBptLiquidity(address: Address, dayTimestamp: string, balance: BigDecimal = BigDecimal.zero(), fetchBalance: boolean = true): void {
+function updateBptLiquidity(address: Address, dayTimestamp: string, balance: BigDecimal = BigDecimal.zero(), fetchBalance: boolean = true): TokenValue {
   const addressString = address.toHexString()
   const token = loadOrCreateToken(addressString)
 
@@ -66,13 +76,11 @@ function updateBptLiquidity(address: Address, dayTimestamp: string, balance: Big
     const vestingToken = tokenContract.try_vestingToken()
     //not fBeets o.O
     if (vestingToken.reverted) {
-      updateTokenBalance(address, dayTimestamp, false, BigDecimal.zero(), id)
-      return
+      return updateTokenBalance(address, dayTimestamp, false, BigDecimal.zero(), id)
     } else {
-      updateTokenBalance(address, dayTimestamp, false)
       const vestingTokenBalance = getVestingTokenBalance(vestingToken.value, address, liquidity.balance)
       updateBptLiquidity(vestingToken.value, dayTimestamp, vestingTokenBalance)
-      return
+      return updateTokenBalance(address, dayTimestamp, false)
     }
   }
   
@@ -88,22 +96,31 @@ function updateBptLiquidity(address: Address, dayTimestamp: string, balance: Big
     ownedPoolTokensBalances.push(toDecimal(poolTokensBalances[i], decimals).times(liquidity.pol).div(BigDecimal.fromString("100")))
   }
 
-  updateTokenBalances(poolTokensAddresses, dayTimestamp, false, ownedPoolTokensBalances, id)
+  return updateTokenBalances(poolTokensAddresses, dayTimestamp, false, ownedPoolTokensBalances, id)
 }
 
-export function updateUniLiquidities(tokens: Address[], dayTimestamp: string, balances: BigDecimal[] = []): void {
+export function updateUniLiquidities(tokens: Address[], dayTimestamp: string, balances: BigDecimal[] = []): TokenValue {
+  const tokenValues: TokenValue = {
+    riskFreeValue: BigDecimal.zero(),
+    riskyValue: BigDecimal.zero()
+  }
   if (balances.length) {
     for (let i = 0; i < tokens.length; i ++) {
-      updateUniLiquidity(tokens[i], dayTimestamp, balances[i], false)
+      const _tokenValue = updateUniLiquidity(tokens[i], dayTimestamp, balances[i], false)
+      tokenValues.riskFreeValue = tokenValues.riskFreeValue.plus(_tokenValue.riskFreeValue)
+      tokenValues.riskyValue = tokenValues.riskyValue.plus(_tokenValue.riskyValue)
     }
   } else {
     for (let i = 0; i < tokens.length; i ++) {
-      updateUniLiquidity(tokens[i], dayTimestamp)
+      const _tokenValue = updateUniLiquidity(tokens[i], dayTimestamp)
+      tokenValues.riskFreeValue = tokenValues.riskFreeValue.plus(_tokenValue.riskFreeValue)
+      tokenValues.riskyValue = tokenValues.riskyValue.plus(_tokenValue.riskyValue)
     }
   }
+  return tokenValues
 }
 
-function updateUniLiquidity(address: Address, dayTimestamp: string, balance: BigDecimal = BigDecimal.zero(), fetchBalance: boolean = true): void {
+function updateUniLiquidity(address: Address, dayTimestamp: string, balance: BigDecimal = BigDecimal.zero(), fetchBalance: boolean = true): TokenValue {
   const addressString = address.toHexString()
   const token = loadOrCreateToken(addressString)
 
@@ -132,7 +149,7 @@ function updateUniLiquidity(address: Address, dayTimestamp: string, balance: Big
   const token0Decimals = getDecimals(token0)
   const token1Decimals = getDecimals(token1)
 
-  updateTokenBalance(
+  const tokenValue0 = updateTokenBalance(
     token0,
     dayTimestamp,
     false,
@@ -140,7 +157,7 @@ function updateUniLiquidity(address: Address, dayTimestamp: string, balance: Big
     id,
     false
   )
-  updateTokenBalance(
+  const tokenValue1 = updateTokenBalance(
     token1,
     dayTimestamp,
     false,
@@ -148,4 +165,8 @@ function updateUniLiquidity(address: Address, dayTimestamp: string, balance: Big
     id,
     false
   )
+
+  tokenValue0.riskFreeValue = tokenValue0.riskFreeValue.plus(tokenValue1.riskFreeValue)
+  tokenValue0.riskyValue = tokenValue0.riskyValue.plus(tokenValue1.riskyValue)
+  return tokenValue0
 }

@@ -12,6 +12,11 @@ import { getIndex, updateRunway } from "./ProtocolMetric"
 import { loadOrCreateToken } from "./Token"
 import { loadOrCreateTreasury } from "./Treasury"
 
+export class TokenValue {
+  riskFreeValue: BigDecimal
+  riskyValue: BigDecimal
+}
+
 export function loadOrCreateTokenBalance(id: string): TokenBalance {
   let tokenBalance = TokenBalance.load(id)
   if (!tokenBalance) {
@@ -34,21 +39,27 @@ export function updateTokenBalances(
   riskFree: boolean = false,
   balances: BigDecimal[] = [],
   liquidityId: string = '',
-): void {
-  for (let i = 0; i < tokens.length; i++) {
-    if (balances.length) {
-      updateTokenBalance(
-        tokens[i],
-        timestamp,
-        riskFree,
-        balances[i],
-        liquidityId,
-        false
-      )
-    } else {
-      updateTokenBalance(tokens[i], timestamp, riskFree, BigDecimal.zero(), liquidityId)
+): TokenValue {
+  const tokenValues: TokenValue = {
+    riskFreeValue: BigDecimal.zero(),
+    riskyValue: BigDecimal.zero()
+  }
+
+  if (balances.length) {
+    for (let i = 0; i < tokens.length; i++) {
+      const _tokenValues = updateTokenBalance(tokens[i], timestamp, riskFree, balances[i], liquidityId, false)
+      tokenValues.riskFreeValue = tokenValues.riskFreeValue.plus(_tokenValues.riskFreeValue)
+      tokenValues.riskyValue = tokenValues.riskyValue.plus(_tokenValues.riskyValue)
+    }
+  } else {
+    for (let i = 0; i < tokens.length; i++) {
+      const _tokenValues = updateTokenBalance(tokens[i], timestamp, riskFree, BigDecimal.zero(), liquidityId)
+      tokenValues.riskFreeValue = tokenValues.riskFreeValue.plus(_tokenValues.riskFreeValue)
+      tokenValues.riskyValue = tokenValues.riskyValue.plus(_tokenValues.riskyValue)
     }
   }
+  
+  return tokenValues
 }
 
 export function updateTokenBalance(
@@ -58,41 +69,42 @@ export function updateTokenBalance(
   balance: BigDecimal = BigDecimal.zero(),
   liquidityId: string = '',
   fetchBalance: boolean = true
-): void {
+): TokenValue {
   const addressString = address.toHexString()
-    const token = loadOrCreateToken(addressString)
-    const id = !!liquidityId ? `${addressString}-${timestamp}-${liquidityId}` : `${addressString}-${timestamp}`
+  const token = loadOrCreateToken(addressString)
+  const id = !!liquidityId ? `${addressString}-${timestamp}-${liquidityId}` : `${addressString}-${timestamp}`
 
-    const tokenBalance = loadOrCreateTokenBalance(id)
+  const tokenBalance = loadOrCreateTokenBalance(id)
 
-    if (!fetchBalance) {
-      tokenBalance.balance = balance
-    } else {
-      const tokenERC20 = ERC20.bind(address)
-      const decimals = tokenERC20.decimals()
-      const treasuryTrackerContract = TreasuryTracker.bind(Address.fromString(TREASURY_TRACKER_CONTRACT))
-      const balance = toDecimal(treasuryTrackerContract.balance(address), decimals)
-      tokenBalance.balance = balance
+  if (!fetchBalance) {
+    tokenBalance.balance = balance
+  } else {
+    const tokenERC20 = ERC20.bind(address)
+    const decimals = tokenERC20.decimals()
+    const treasuryTrackerContract = TreasuryTracker.bind(Address.fromString(TREASURY_TRACKER_CONTRACT))
+    const balance = toDecimal(treasuryTrackerContract.balance(address), decimals)
+    tokenBalance.balance = balance
+  }
+  tokenBalance.value = getPrice(address).times(tokenBalance.balance)
+  tokenBalance.treasury = timestamp
+  tokenBalance.isRiskFree = riskFree
+  tokenBalance.isLiquidity = !!liquidityId
+  tokenBalance.liquidity = liquidityId ? liquidityId : null
+  tokenBalance.timestamp = BigInt.fromString(timestamp)
+  tokenBalance.token = token.id
+  tokenBalance.save()
+
+  if (riskFree) {
+    return {
+      riskFreeValue: tokenBalance.value,
+      riskyValue: BigDecimal.zero()
     }
-    tokenBalance.value = getPrice(address).times(tokenBalance.balance)
-    tokenBalance.treasury = timestamp
-    tokenBalance.isRiskFree = riskFree
-    tokenBalance.isLiquidity = !!liquidityId
-    tokenBalance.liquidity = liquidityId ? liquidityId : null
-    tokenBalance.timestamp = BigInt.fromString(timestamp)
-    tokenBalance.token = token.id
-    tokenBalance.save()
-
-    const treasury = loadOrCreateTreasury(timestamp)
-
-    if (riskFree) {
-      treasury.riskFreeValue = treasury.riskFreeValue.plus(tokenBalance.value)
-      treasury.marketValue = treasury.marketValue.plus(tokenBalance.value)
-      updateRunway(timestamp, treasury.riskFreeValue)
-    } else {
-      treasury.marketValue = treasury.marketValue.plus(tokenBalance.value)
+  } else {
+    return {
+      riskFreeValue: BigDecimal.zero(),
+      riskyValue: tokenBalance.value
     }
-    treasury.save()
+  }
 }
 
 function getPrice(token: Address): BigDecimal {

@@ -2,9 +2,10 @@ import { Address, BigDecimal, BigInt } from "@graphprotocol/graph-ts";
 import { ERC20 } from "../../generated/TreasuryTracker/ERC20";
 import { Transfer } from "../../generated/TreasuryTracker/EXODERC20";
 import { loadOrCreateExodian } from "../entitites/Exodian";
-import { loadOrCreateHolderCount } from "../entitites/HolderCount";
+import { loadOrCreateAux } from "../entitites/Aux";
 import { SEXOD_ERC20_CONTRACT } from "../utils/constants";
-import { toDecimal } from "../utils/helpers";
+import { dayFromTimestamp, toDecimal } from "../utils/helpers";
+import { updateHolders } from "../entitites/ProtocolMetric";
 
 export function handleTransfer(transfer: Transfer): void {
   const sExodERC20 = ERC20.bind(Address.fromString(SEXOD_ERC20_CONTRACT))
@@ -18,26 +19,31 @@ export function handleTransfer(transfer: Transfer): void {
       && sender.sExodBalance.le(BigDecimal.zero())
       && sender.wsExodBalance.le(BigDecimal.zero())
     ) {
-      const holderCount = loadOrCreateHolderCount()
-      holderCount.totalHolders = holderCount.totalHolders.minus(BigInt.fromU32(1))
-      holderCount.save()
+      const aux = loadOrCreateAux()
+      aux.totalHolders = aux.totalHolders.minus(BigInt.fromU32(1))
+      aux.save()
       sender.heldSince = transfer.block.timestamp
     }
     sender.save()
   }
 
-  if (transfer.params.to.notEqual(Address.zero())) {
+  if (transfer.params.to.notEqual(Address.zero())
+    && transfer.params.to.notEqual(Address.fromHexString(SEXOD_ERC20_CONTRACT))
+  ) {
     const receiver = loadOrCreateExodian(transfer.params.to.toHexString())
     if (receiver.exodBalance.le(BigDecimal.zero())
       && receiver.sExodBalance.le(BigDecimal.zero())
       && receiver.wsExodBalance.le(BigDecimal.zero())
     ) {
-      const holderCount = loadOrCreateHolderCount()
-      holderCount.totalHolders = holderCount.totalHolders.plus(BigInt.fromU32(1))
-      holderCount.save()
+      const aux = loadOrCreateAux()
+      aux.totalHolders = aux.totalHolders.plus(BigInt.fromU32(1))
+      aux.save()
       receiver.heldSince = transfer.block.timestamp
     }
     receiver.sExodBalance = toDecimal(sExodERC20.balanceOf(transfer.params.to), 9)
     receiver.save()
   }
+
+  const dayTimestamp = dayFromTimestamp(transfer.block.timestamp)
+  updateHolders(dayTimestamp)
 }

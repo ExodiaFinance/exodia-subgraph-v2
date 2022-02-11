@@ -2,55 +2,55 @@ specVersion: 0.0.2
 schema:
   file: ./schema.graphql
 dataSources:
-  - kind: ethereum
-    name: TreasuryTracker
-    network: fantom
-    source:
-      address: "0x68f30FEd7a9132832d93fAE18dE717D6533edF97"
-      abi: TreasuryTracker
-      startBlock: 20104750
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.5
-      language: wasm/assemblyscript
-      entities:
-        - OwnershipPulled
-        - OwnershipPushed
-      abis:
-        - name: TreasuryTracker
-          file: ./abis/TreasuryTracker.json
-        - name: CirculatingSupply
-          file: ./abis/CirculatingSupply.json
-        - name: EXODERC20
-          file: ./abis/EXODERC20.json
-        - name: UniswapV2Pair
-          file: ./abis/UniswapV2Pair.json
-        - name: SEXODERC20
-          file: ./abis/SEXODERC20.json
-        - name: ExodStaking
-          file: ./abis/ExodStaking.json
-        - name: ERC20
-          file: ./abis/ERC20.json
-        - name: BalancerVault
-          file: ./abis/BalancerVault.json
-        - name: WeightedPool
-          file: ./abis/WeightedPool.json
-        - name: PriceOracle
-          file: ./abis/PriceOracle.json
-        - name: WeightedPool2
-          file: ./abis/WeightedPool2.json
-        - name: BeethovenxMasterChef
-          file: ./abis/BeethovenxMasterChef.json
-      blockHandlers:
-        - handler: handleBlock
-      file: ./src/mappings/TreasuryTracker.ts
+  # - kind: ethereum
+  #   name: TreasuryTracker
+  #   network: fantom
+  #   source:
+  #     address: "0x68f30FEd7a9132832d93fAE18dE717D6533edF97"
+  #     abi: TreasuryTracker
+  #     startBlock: 20104750
+  #   mapping:
+  #     kind: ethereum/events
+  #     apiVersion: 0.0.5
+  #     language: wasm/assemblyscript
+  #     entities:
+  #       - OwnershipPulled
+  #       - OwnershipPushed
+  #     abis:
+  #       - name: TreasuryTracker
+  #         file: ./abis/TreasuryTracker.json
+  #       - name: CirculatingSupply
+  #         file: ./abis/CirculatingSupply.json
+  #       - name: EXODERC20
+  #         file: ./abis/EXODERC20.json
+  #       - name: UniswapV2Pair
+  #         file: ./abis/UniswapV2Pair.json
+  #       - name: SEXODERC20
+  #         file: ./abis/SEXODERC20.json
+  #       - name: ExodStaking
+  #         file: ./abis/ExodStaking.json
+  #       - name: ERC20
+  #         file: ./abis/ERC20.json
+  #       - name: BalancerVault
+  #         file: ./abis/BalancerVault.json
+  #       - name: WeightedPool
+  #         file: ./abis/WeightedPool.json
+  #       - name: PriceOracle
+  #         file: ./abis/PriceOracle.json
+  #       - name: WeightedPool2
+  #         file: ./abis/WeightedPool2.json
+  #       - name: BeethovenxMasterChef
+  #         file: ./abis/BeethovenxMasterChef.json
+  #     blockHandlers:
+  #       - handler: handleBlock
+  #     file: ./src/mappings/TreasuryTracker.ts
   - kind: ethereum
     name: ExodiaERC20Token
     network: fantom
     source:
       address: "0x3b57f3FeAaF1e8254ec680275Ee6E7727C7413c7"
       abi: EXODERC20
-      startBlock: 20057550
+      startBlock: 20097527	
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
@@ -90,7 +90,7 @@ dataSources:
     source:
       address: "0x8de250C65636Ef02a75e4999890c91cECd38D03D"
       abi: SEXODERC20
-      startBlock: 20058992
+      startBlock:	20097527	
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5

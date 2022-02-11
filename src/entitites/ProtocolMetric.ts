@@ -6,7 +6,7 @@ import { ExodStaking } from "../../generated/TreasuryTracker/ExodStaking"
 import { SEXODERC20 } from "../../generated/TreasuryTracker/SEXODERC20"
 import { CIRCULATING_SUPPLY_CONTRACT, EXOD_ERC20_CONTRACT, EXOD_STAKING_CONTRACT, SEXOD_ERC20_CONTRACT } from "../utils/constants"
 import { getExodPrice, toDecimal } from "../utils/helpers"
-import { loadOrCreateHolderCount } from "./HolderCount"
+import { loadOrCreateAux } from "./Aux"
 
 export function updateProtocolMetric(dayTimestamp: string): void {
   const protocolMetric = loadOrCreateProtocolMetric(dayTimestamp)
@@ -30,7 +30,7 @@ export function loadOrCreateProtocolMetric(timestamp: string): ProtocolMetric {
    protocolMetric.price = BigDecimal.zero()
    protocolMetric.marketCap = BigDecimal.zero()
    protocolMetric.tvl = BigDecimal.zero()
-   protocolMetric.holders = loadOrCreateHolderCount().totalHolders
+   protocolMetric.holders = BigInt.zero()
    protocolMetric.runway = BigDecimal.zero()
   }
   return protocolMetric
@@ -43,6 +43,9 @@ function getRunway(rfv: BigDecimal): BigDecimal {
   if (sExodSupply.gt(BigDecimal.zero())) {
     const rebaseRate = toDecimal(stakingContract.epoch().value3, 9)
     .div(sExodSupply)
+    if (rebaseRate.le(BigDecimal.zero())) {
+      return BigDecimal.zero()
+    }
     const rebases = Math.log( parseFloat(rfv.div(sExodSupply).toString()) ) / Math.log( 1 + parseFloat(rebaseRate.toString()) )
     const runway = rebases * 28800 * 0.9 / 86400
     return BigDecimal.fromString(runway.toString())
@@ -78,5 +81,11 @@ export function getIndex(): BigDecimal {
 export function updateRunway(timestamp: string, rfv: BigDecimal): void {
   const protocolMetric = loadOrCreateProtocolMetric(timestamp)
   protocolMetric.runway = getRunway(rfv)
+  protocolMetric.save()
+}
+
+export function updateHolders(timestamp: string): void {
+  const protocolMetric = loadOrCreateProtocolMetric(timestamp)
+  protocolMetric.holders = loadOrCreateAux().totalHolders
   protocolMetric.save()
 }

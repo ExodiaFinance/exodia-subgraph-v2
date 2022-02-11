@@ -3,13 +3,20 @@ import { Treasury } from "../../generated/schema"
 import { TreasuryTracker } from "../../generated/TreasuryTracker/TreasuryTracker"
 import { BEETHOVEN_MASTERCHEF_CONTRACT, DAO_WALLET, TREASURY_CONTRACT, TREASURY_TRACKER_CONTRACT } from "../utils/constants"
 import { updateBptLiquidities, updateUniLiquidities } from "./Liquidity"
-import { updateTokenBalances } from "./TokenBalance"
+import { TokenValue, updateTokenBalances } from "./TokenBalance"
 import { bptLiquidities, uniLiquidities, assetsWithRisk, riskFreeAssets } from "../utils/assetMap"
 import { ERC20 } from "../../generated/TreasuryTracker/ERC20"
 import { toDecimal } from "../utils/helpers"
 import { BeethovenxMasterChef } from "../../generated/TreasuryTracker/BeethovenxMasterChef"
+import { updateRunway } from "./ProtocolMetric"
  
 export function updateTreasury(dayTimestamp: string, blockNumber: BigInt): void {
+  const treasury = loadOrCreateTreasury(dayTimestamp)
+  const treasuryValues: TokenValue = {
+    riskFreeValue: BigDecimal.zero(),
+    riskyValue: BigDecimal.zero()
+  }
+
   //if TreasuryTracker contract deployed
   if (blockNumber.gt(BigInt.fromU32(30018644))) {
     const treasuryTrackerContract = TreasuryTracker.bind(Address.fromString(TREASURY_TRACKER_CONTRACT))
@@ -18,30 +25,44 @@ export function updateTreasury(dayTimestamp: string, blockNumber: BigInt): void 
     const riskFreeAssets = treasuryTrackerContract.getRiskFreeAssets()
     const assetsWithRisks = treasuryTrackerContract.getAssetsWithRisk()
     
-    updateBptLiquidities(bpts, dayTimestamp)
-    updateUniLiquidities(uniLps, dayTimestamp)
-    updateTokenBalances(riskFreeAssets, dayTimestamp, true)
-    updateTokenBalances(assetsWithRisks, dayTimestamp, false)
+    const bptValues = updateBptLiquidities(bpts, dayTimestamp)
+    const uniLpValues = updateUniLiquidities(uniLps, dayTimestamp)
+    const riskFreeValues = updateTokenBalances(riskFreeAssets, dayTimestamp, true)
+    const riskyValues = updateTokenBalances(assetsWithRisks, dayTimestamp, false)
+
+    treasuryValues.riskFreeValue = bptValues.riskFreeValue
+      .plus(uniLpValues.riskFreeValue)
+      .plus(riskFreeValues.riskFreeValue)
+      .plus(riskyValues.riskFreeValue)
+    treasuryValues.riskyValue = bptValues.riskyValue
+      .plus(uniLpValues.riskyValue)
+      .plus(riskFreeValues.riskyValue)
+      .plus(riskyValues.riskyValue)
   } else {
     const bpt = getBpts(blockNumber)
     const uniLp = getUniLps(blockNumber)
     const riskFreeAsset = getRiskFreeAssets(blockNumber)
     const assetsWithRisks = getAssetsWithRisks(blockNumber)
-    log.debug("bpt addresses: {}, uniLp addresses: {}", [`${bpt.addresses}`, `${uniLp.addresses}`])
     
-    if (bpt.addresses.length) {
-      updateBptLiquidities(bpt.addresses, dayTimestamp, bpt.balances)
-    }
-    if (uniLp.addresses.length) {
-      updateUniLiquidities(uniLp.addresses, dayTimestamp, uniLp.balances)
-    }
-    if (riskFreeAsset.addresses.length) {
-      updateTokenBalances(riskFreeAsset.addresses, dayTimestamp, true, riskFreeAsset.balances)
-    }
-    if (assetsWithRisks.addresses.length) {
-      updateTokenBalances(assetsWithRisks.addresses, dayTimestamp, false, assetsWithRisks.balances)
-    }
+    const bptValues = updateBptLiquidities(bpt.addresses, dayTimestamp, bpt.balances)
+    const uniLpValues = updateUniLiquidities(uniLp.addresses, dayTimestamp, uniLp.balances)
+    const riskFreeValues = updateTokenBalances(riskFreeAsset.addresses, dayTimestamp, true, riskFreeAsset.balances)
+    const riskyValues = updateTokenBalances(assetsWithRisks.addresses, dayTimestamp, false, assetsWithRisks.balances)
+
+    treasuryValues.riskFreeValue = bptValues.riskFreeValue
+      .plus(uniLpValues.riskFreeValue)
+      .plus(riskFreeValues.riskFreeValue)
+      .plus(riskyValues.riskFreeValue)
+    treasuryValues.riskyValue = bptValues.riskyValue
+      .plus(uniLpValues.riskyValue)
+      .plus(riskFreeValues.riskyValue)
+      .plus(riskyValues.riskyValue)
   }
+
+  treasury.riskFreeValue = treasuryValues.riskFreeValue
+  treasury.marketValue = treasuryValues.riskFreeValue.plus(treasuryValues.riskyValue)
+  treasury.save()
+  updateRunway(dayTimestamp, treasury.riskFreeValue)
 }
 
 export function loadOrCreateTreasury(timestamp: string): Treasury {
