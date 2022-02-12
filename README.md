@@ -6,7 +6,7 @@ Updating this subgraph code and redeploying is required when any of the followin
 - New bonds are deployed which contain new tokens with prices not previously tracked
 
 New tokens will be priced as $0 if they are not added to the price tracking
-See [list of tokens tracked](##Token-Prices-Tracked)
+See [list of tokens tracked](#Token-Prices-Tracked)
 
 ## Adding new tokens to track price
 1. Add new priceMap object to priceMaps array in `src/utils/priceMap.ts`
@@ -42,8 +42,8 @@ See [list of tokens tracked](##Token-Prices-Tracked)
 		// Add new token to track price here
 	]
 ```
-2. Deploy new subgraph by grafting from block number where the new token was added. see [deploy subgraph with graft](##Deploy-subgraph-with-grafting)
-3. Update README.md to add new tokens tracked to the [list](##Token-Prices-Tracked)
+2. Deploy new subgraph by grafting from block number where the new token was added. see [deploy subgraph with graft](#Deploy-subgraph-with-grafting)
+3. Update README.md to add new tokens tracked to the [list](#Token-Prices-Tracked)
 ## Adding new bonds
 1. Update `subgraph.yaml` to include new bond
 ```
@@ -103,8 +103,8 @@ export  function  handleBondCreated(bond:  BondCreated):  void {
 	updateBond(bond, createBondDeposit(bond))
 }
 ```
- 3. Add new tokens to track price. see [how to add new tokens to track price](##Adding-new-tokens-to-track-price)
- 4. Deploy new subgraph by grafting from block number where the new token was added. see [deploy subgraph with graft](##Deploy-subgraph-with-grafting)
+ 3. Add new tokens to track price. see [how to add new tokens to track price](#Adding-new-tokens-to-track-price)
+ 4. Deploy new subgraph by grafting from block number where the new token was added. see [deploy subgraph with graft](#Deploy-subgraph-with-grafting)
  5. Update README.md to add any new tokens tracked into the list below
 ## Deploy subgraph with grafting
 1. in `subgraph.yaml`: 
