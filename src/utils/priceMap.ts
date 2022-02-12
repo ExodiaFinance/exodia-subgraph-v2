@@ -10,7 +10,6 @@ class PriceMap {
   isUniLpToken: boolean
   isBptToken: boolean
   contractAddress: string
-  priceDecimals: number
 }
 
 export const priceMaps: PriceMap[] = [
@@ -26,7 +25,6 @@ export const priceMaps: PriceMap[] = [
     isUniLpToken: false,
     isBptToken: false,
     contractAddress: "",
-    priceDecimals: 0,
   },
   {
     name: "wsEXOD",
@@ -40,7 +38,6 @@ export const priceMaps: PriceMap[] = [
     isUniLpToken: false,
     isBptToken: false,
     contractAddress: "",
-    priceDecimals: 0,
   },
   {
     name: "DAI",
@@ -54,7 +51,6 @@ export const priceMaps: PriceMap[] = [
     isUniLpToken: false,
     isBptToken: false,
     contractAddress: "",
-    priceDecimals: 0,
   },
   {
     name: "MAI",
@@ -68,7 +64,6 @@ export const priceMaps: PriceMap[] = [
     isUniLpToken: false,
     isBptToken: false,
     contractAddress: "",
-    priceDecimals: 0,
   },
   {
     name: "wFTM",
@@ -82,7 +77,6 @@ export const priceMaps: PriceMap[] = [
     isUniLpToken: false,
     isBptToken: false,
     contractAddress: "0xf4766552D15AE4d256Ad41B6cf2933482B0680dc",
-    priceDecimals: 8
   },
   {
     name: "gOHM",
@@ -96,7 +90,6 @@ export const priceMaps: PriceMap[] = [
     isUniLpToken: false,
     isBptToken: false,
     contractAddress: "0x5E1DEE184a4809EBfcEDa72E4287f4d2d62dC6C1",
-    priceDecimals: 8
   },
   {
     name: "fBEETS",
@@ -110,7 +103,6 @@ export const priceMaps: PriceMap[] = [
     isUniLpToken: false,
     isBptToken: false,
     contractAddress: "0xB90Fc1e595C19d84eAeC802f95d32619bB2dE7A0",
-    priceDecimals: 8
   },
   {
     name: "BEETS",
@@ -124,7 +116,6 @@ export const priceMaps: PriceMap[] = [
     isUniLpToken: false,
     isBptToken: false,
     contractAddress: "0x03c6B3f09D2504606936b1A4DeCeFaD204687890",
-    priceDecimals: 18,
   },
   {
     name: "USDC",
@@ -138,7 +129,6 @@ export const priceMaps: PriceMap[] = [
     isUniLpToken: false,
     isBptToken: false,
     contractAddress: "",
-    priceDecimals: 0,
   },
   {
     name: "EXODDAI UNILP",
@@ -152,7 +142,6 @@ export const priceMaps: PriceMap[] = [
     isUniLpToken: true,
     isBptToken: false,
     contractAddress: "",
-    priceDecimals: 0,
   },
   {
     name: "THE MONOLITH",
@@ -166,6 +155,5 @@ export const priceMaps: PriceMap[] = [
     isUniLpToken: false,
     isBptToken: true,
     contractAddress: "",
-    priceDecimals: 0,
   }
 ]

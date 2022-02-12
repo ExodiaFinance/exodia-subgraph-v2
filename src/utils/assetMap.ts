@@ -14,7 +14,7 @@ class Bpt {
   name: string
   address: string
   startBlock: BigInt
-  poolId: number  
+  poolId: BigInt  
 }
 export const riskFreeAssets: Asset[] = [
   {
@@ -55,12 +55,12 @@ export const bptLiquidities: Bpt[] = [
     name: "THE_MONOLITH",
     address: "0xa216AA5d67Ef95DdE66246829c5103C7843d1AAB",
     startBlock: BigInt.fromU32(27495398),
-    poolId: 37
+    poolId: BigInt.fromU32(37)
   },
   {
     name: "fBEETS",
     address: "0xfcef8a994209d6916EB2C86cDD2AFD60Aa6F54b1",
     startBlock: BigInt.fromU32(28965971),
-    poolId: 22
+    poolId: BigInt.fromU32(22)
   }
 ]

@@ -98,7 +98,7 @@ function getBpts(blockNumber: BigInt): assetBalances {
       const masterChefContract = BeethovenxMasterChef.bind(Address.fromString(BEETHOVEN_MASTERCHEF_CONTRACT))
       const farmingBalance = toDecimal(
         masterChefContract.userInfo(
-          BigInt.fromString(bptLiquidities[i].poolId.toString()),
+          bptLiquidities[i].poolId,
           Address.fromString(DAO_WALLET)
         ).value0,
         decimals

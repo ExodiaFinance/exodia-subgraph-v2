@@ -1,12 +1,12 @@
-import { BigDecimal, Address, ByteArray, BigInt } from "@graphprotocol/graph-ts"
+import { BigDecimal, Address, ByteArray, BigInt, Bytes } from "@graphprotocol/graph-ts"
 import { TokenBalance } from "../../generated/schema"
 import { BalancerVault } from "../../generated/TreasuryTracker/BalancerVault"
 import { ERC20 } from "../../generated/TreasuryTracker/ERC20"
-import { PriceOracle } from "../../generated/TreasuryTracker/PriceOracle"
+import { PriceOracle } from "../../generated/ExodiaERC20Token/PriceOracle"
 import { TreasuryTracker } from "../../generated/TreasuryTracker/TreasuryTracker"
 import { UniswapV2Pair } from "../../generated/TreasuryTracker/UniswapV2Pair"
 import { WeightedPool } from "../../generated/TreasuryTracker/WeightedPool"
-import { WeightedPool2 } from "../../generated/TreasuryTracker/WeightedPool2"
+import { WeightedPool2 } from "../../generated/ExodiaERC20Token/WeightedPool2"
 import { BALANCERVAULT_CONTRACT, TREASURY_TRACKER_CONTRACT } from "../utils/constants"
 import { getDecimals, getExodPrice, toDecimal } from "../utils/helpers"
 import { priceMaps } from "../utils/priceMap"
@@ -54,7 +54,7 @@ export function updateTokenBalances(
     }
   } else {
     for (let i = 0; i < tokens.length; i++) {
-      const _tokenValues = updateTokenBalance(tokens[i], timestamp, riskFree, BigDecimal.zero(), liquidityId)
+      const _tokenValues = updateTokenBalance(tokens[i], timestamp, riskFree, BigDecimal.zero(), liquidityId, true)
       tokenValues.riskFreeValue = tokenValues.riskFreeValue.plus(_tokenValues.riskFreeValue)
       tokenValues.riskyValue = tokenValues.riskyValue.plus(_tokenValues.riskyValue)
     }
@@ -69,7 +69,7 @@ export function updateTokenBalance(
   riskFree: boolean = false,
   balance: BigDecimal = BigDecimal.zero(),
   liquidityId: string = '',
-  fetchBalance: boolean = true
+  fetchBalance: boolean = true,
 ): TokenValue {
   const addressString = address.toHexString()
   const token = loadOrCreateToken(addressString)
@@ -122,10 +122,10 @@ export function getPrice(token: Address): BigDecimal {
         result = getExodPrice().times(getIndex())
         break
       } else if (priceMaps[i].isOracle) {
-        result = getOraclePrice(priceMaps[i].contractAddress, priceMaps[i].priceDecimals)
+        result = getOraclePrice(priceMaps[i].contractAddress)
         break
       } else if (priceMaps[i].isWeightedPool2) {
-        result = getWeightedPool2Price(priceMaps[i].contractAddress, priceMaps[i].priceDecimals)
+        result = getWeightedPool2Price(priceMaps[i].contractAddress)
         break
       } else if (priceMaps[i].isUniLp) {
         result = getUniLpPrice(priceMaps[i].contractAddress, priceMaps[i].tokenAddress)
@@ -172,10 +172,38 @@ function getBptTokenPrice(address: string): BigDecimal {
   return price
 }
 
-function getOraclePrice(address: string, decimals: number): BigDecimal {
+function getOraclePrice(address: string): BigDecimal {
   const oracle = PriceOracle.bind(Address.fromString(address))
-  const price = toDecimal(oracle.latestAnswer(), decimals)
+  const decimals = oracle.try_decimals()
+  if (decimals.reverted) {
+    //get gOHM price before oracle deployed from monolith pool
+    if (address === "0x5E1DEE184a4809EBfcEDa72E4287f4d2d62dC6C1") {
+      return getPriceBeforegOhmOracle()
+    } else {
+      return BigDecimal.zero()
+    }
+  }
+  const price = toDecimal(oracle.latestAnswer(), decimals.value)
   return price
+}
+
+function getPriceBeforegOhmOracle(): BigDecimal {
+  const balancerVault = BalancerVault.bind(Address.fromString(BALANCERVAULT_CONTRACT))
+  const gOHMBalance = toDecimal(
+    balancerVault.getPoolTokenInfo(
+      Bytes.fromByteArray(Bytes.fromHexString("0xa216aa5d67ef95dde66246829c5103c7843d1aab000100000000000000000112")),
+      Address.fromString("0x91fa20244fb509e8289ca630e5db3e9166233fdc")
+    ).value0,
+    18
+  )
+  const maiBalance = toDecimal(
+    balancerVault.getPoolTokenInfo(
+      Bytes.fromByteArray(Bytes.fromHexString("0xa216aa5d67ef95dde66246829c5103c7843d1aab000100000000000000000112")),
+      Address.fromString("0xfB98B335551a418cD0737375a2ea0ded62Ea213b")
+    ).value0,
+    18
+  )
+  return maiBalance.div(gOHMBalance)
 }
 
 function getUniLpPrice(contractAddress: string, tokenAddress: string): BigDecimal {
@@ -196,8 +224,9 @@ function getUniLpPrice(contractAddress: string, tokenAddress: string): BigDecima
   return price
 }
 
-function getWeightedPool2Price(contractAddress: string, decimals: number): BigDecimal {
+function getWeightedPool2Price(contractAddress: string): BigDecimal {
   const poolContract = WeightedPool2.bind(Address.fromString(contractAddress))
+  const decimals = poolContract.decimals()
   const price = toDecimal(poolContract.getLatest(0), decimals)
   return price
 }
