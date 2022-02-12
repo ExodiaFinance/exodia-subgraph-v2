@@ -1,5 +1,5 @@
 import { BigDecimal, Address, ByteArray, BigInt } from "@graphprotocol/graph-ts"
-import { TokenBalance, Treasury } from "../../generated/schema"
+import { TokenBalance } from "../../generated/schema"
 import { BalancerVault } from "../../generated/TreasuryTracker/BalancerVault"
 import { ERC20 } from "../../generated/TreasuryTracker/ERC20"
 import { PriceOracle } from "../../generated/TreasuryTracker/PriceOracle"
@@ -10,9 +10,8 @@ import { WeightedPool2 } from "../../generated/TreasuryTracker/WeightedPool2"
 import { BALANCERVAULT_CONTRACT, TREASURY_TRACKER_CONTRACT } from "../utils/constants"
 import { getDecimals, getExodPrice, toDecimal } from "../utils/helpers"
 import { priceMaps } from "../utils/priceMap"
-import { getIndex, updateRunway } from "./ProtocolMetric"
+import { getIndex } from "./ProtocolMetric"
 import { loadOrCreateToken } from "./Token"
-import { loadOrCreateTreasury } from "./Treasury"
 
 export class TokenValue {
   riskFreeValue: BigDecimal
