@@ -7,6 +7,8 @@ class PriceMap {
   isOracle: boolean
   isUniLp: boolean
   isWeightedPool2: boolean
+  isUniLpToken: boolean
+  isBptToken: boolean
   contractAddress: string
   priceDecimals: number
 }
@@ -21,6 +23,8 @@ export const priceMaps: PriceMap[] = [
     isOracle: false,
     isUniLp: false,
     isWeightedPool2: false,
+    isUniLpToken: false,
+    isBptToken: false,
     contractAddress: "",
     priceDecimals: 0,
   },
@@ -33,6 +37,8 @@ export const priceMaps: PriceMap[] = [
     isOracle: false,
     isUniLp: false,
     isWeightedPool2: false,
+    isUniLpToken: false,
+    isBptToken: false,
     contractAddress: "",
     priceDecimals: 0,
   },
@@ -45,6 +51,8 @@ export const priceMaps: PriceMap[] = [
     isOracle: false,
     isUniLp: false,
     isWeightedPool2: false,
+    isUniLpToken: false,
+    isBptToken: false,
     contractAddress: "",
     priceDecimals: 0,
   },
@@ -57,6 +65,8 @@ export const priceMaps: PriceMap[] = [
     isOracle: false,
     isUniLp: false,
     isWeightedPool2: false,
+    isUniLpToken: false,
+    isBptToken: false,
     contractAddress: "",
     priceDecimals: 0,
   },
@@ -69,6 +79,8 @@ export const priceMaps: PriceMap[] = [
     isOracle: true,
     isUniLp: false,
     isWeightedPool2: false,
+    isUniLpToken: false,
+    isBptToken: false,
     contractAddress: "0xf4766552D15AE4d256Ad41B6cf2933482B0680dc",
     priceDecimals: 8
   },
@@ -81,6 +93,8 @@ export const priceMaps: PriceMap[] = [
     isOracle: true,
     isUniLp: false,
     isWeightedPool2: false,
+    isUniLpToken: false,
+    isBptToken: false,
     contractAddress: "0x5E1DEE184a4809EBfcEDa72E4287f4d2d62dC6C1",
     priceDecimals: 8
   },
@@ -93,6 +107,8 @@ export const priceMaps: PriceMap[] = [
     isOracle: true,
     isUniLp: false,
     isWeightedPool2: false,
+    isUniLpToken: false,
+    isBptToken: false,
     contractAddress: "0xB90Fc1e595C19d84eAeC802f95d32619bB2dE7A0",
     priceDecimals: 8
   },
@@ -105,6 +121,8 @@ export const priceMaps: PriceMap[] = [
     isOracle: false,
     isUniLp: false,
     isWeightedPool2: true,
+    isUniLpToken: false,
+    isBptToken: false,
     contractAddress: "0x03c6B3f09D2504606936b1A4DeCeFaD204687890",
     priceDecimals: 18,
   },
@@ -117,6 +135,36 @@ export const priceMaps: PriceMap[] = [
     isOracle: false,
     isUniLp: false,
     isWeightedPool2: false,
+    isUniLpToken: false,
+    isBptToken: false,
+    contractAddress: "",
+    priceDecimals: 0,
+  },
+  {
+    name: "EXODDAI UNILP",
+    tokenAddress: "0xc0c1dff0fe24108586e11ec9e20a7cbb405cb769",
+    isExod: false,
+    iswsExod: false,
+    isStable: false,
+    isOracle: false,
+    isUniLp: false,
+    isWeightedPool2: false,
+    isUniLpToken: true,
+    isBptToken: false,
+    contractAddress: "",
+    priceDecimals: 0,
+  },
+  {
+    name: "THE MONOLITH",
+    tokenAddress: "0xa216AA5d67Ef95DdE66246829c5103C7843d1AAB",
+    isExod: false,
+    iswsExod: false,
+    isStable: false,
+    isOracle: false,
+    isUniLp: false,
+    isWeightedPool2: false,
+    isUniLpToken: false,
+    isBptToken: true,
     contractAddress: "",
     priceDecimals: 0,
   }
