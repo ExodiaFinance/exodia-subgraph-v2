@@ -23,6 +23,7 @@ export function handleTransfer(transfer: Transfer): void {
       aux.totalHolders = aux.totalHolders.minus(BigInt.fromU32(1))
       aux.save()
       sender.heldSince = transfer.block.timestamp
+      sender.active = false
     }
     sender.save()
   }

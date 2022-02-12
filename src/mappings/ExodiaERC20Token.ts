@@ -4,16 +4,22 @@ import { Transfer } from "../../generated/TreasuryTracker/EXODERC20";
 import { loadOrCreateExodian } from "../entitites/Exodian";
 import { loadOrCreateAux } from "../entitites/Aux";
 import { EXOD_ERC20_CONTRACT } from "../utils/constants";
-import { dayFromTimestamp, toDecimal } from "../utils/helpers";
+import { dayFromTimestamp, hourFromTimestamp, toDecimal } from "../utils/helpers";
 import { updateHolders, updateProtocolMetric } from "../entitites/ProtocolMetric";
 import { updateSimpleStaking } from "../entitites/SimpleStaking";
 import { updateTreasury } from "../entitites/Treasury";
 
 export function handleTransfer(transfer: Transfer): void {
   const dayTimestamp = dayFromTimestamp(transfer.block.timestamp)
-  updateTreasury(dayTimestamp, transfer.block.number)
-  updateProtocolMetric(dayTimestamp)
-  updateSimpleStaking(dayTimestamp)
+  const hourTimestamp = hourFromTimestamp(transfer.block.timestamp)
+  const aux = loadOrCreateAux()
+  if (aux.hourlyTimestamp.notEqual(hourTimestamp)) {
+    aux.hourlyTimestamp = hourTimestamp
+    aux.save()
+    updateTreasury(dayTimestamp, transfer.block.number)
+    updateProtocolMetric(dayTimestamp)
+    updateSimpleStaking(dayTimestamp)
+  }
 
   const exodERC20 = ERC20.bind(Address.fromString(EXOD_ERC20_CONTRACT))
 
@@ -30,6 +36,7 @@ export function handleTransfer(transfer: Transfer): void {
       aux.totalHolders = aux.totalHolders.minus(BigInt.fromU32(1))
       aux.save()
       sender.heldSince = transfer.block.timestamp
+      sender.active = false
     }
     sender.save()
   }

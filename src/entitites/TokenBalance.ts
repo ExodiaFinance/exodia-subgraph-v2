@@ -107,7 +107,7 @@ export function updateTokenBalance(
   }
 }
 
-function getPrice(token: Address): BigDecimal {
+export function getPrice(token: Address): BigDecimal {
   let result = BigDecimal.zero()
   for (let i = 0; i < priceMaps.length; i++) {
     if (token.equals(ByteArray.fromHexString(priceMaps[i].tokenAddress))) {
@@ -126,9 +126,10 @@ function getPrice(token: Address): BigDecimal {
       } else if (priceMaps[i].isWeightedPool2) {
         result = getWeightedPool2Price(priceMaps[i].contractAddress, priceMaps[i].priceDecimals)
         break
+      } else if (priceMaps[i].isUniLp) {
+        result = getUniLpPrice(priceMaps[i].contractAddress, priceMaps[i].tokenAddress)
+        break
       }
-      result = getUniLpPrice(priceMaps[i].contractAddress, priceMaps[i].tokenAddress)
-      break
     }
   } 
   return result

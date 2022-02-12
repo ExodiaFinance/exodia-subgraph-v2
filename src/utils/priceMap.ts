@@ -5,6 +5,7 @@ class PriceMap {
   iswsExod: boolean
   isStable: boolean
   isOracle: boolean
+  isUniLp: boolean
   isWeightedPool2: boolean
   contractAddress: string
   priceDecimals: number
@@ -18,6 +19,7 @@ export const priceMaps: PriceMap[] = [
     iswsExod: false,
     isStable: false,
     isOracle: false,
+    isUniLp: false,
     isWeightedPool2: false,
     contractAddress: "",
     priceDecimals: 0,
@@ -29,6 +31,7 @@ export const priceMaps: PriceMap[] = [
     iswsExod: true,
     isStable: false,
     isOracle: false,
+    isUniLp: false,
     isWeightedPool2: false,
     contractAddress: "",
     priceDecimals: 0,
@@ -40,6 +43,7 @@ export const priceMaps: PriceMap[] = [
     iswsExod: false,
     isStable: true,
     isOracle: false,
+    isUniLp: false,
     isWeightedPool2: false,
     contractAddress: "",
     priceDecimals: 0,
@@ -51,6 +55,7 @@ export const priceMaps: PriceMap[] = [
     iswsExod: false,
     isStable: true,
     isOracle: false,
+    isUniLp: false,
     isWeightedPool2: false,
     contractAddress: "",
     priceDecimals: 0,
@@ -62,6 +67,7 @@ export const priceMaps: PriceMap[] = [
     iswsExod: false,
     isStable: false,
     isOracle: true,
+    isUniLp: false,
     isWeightedPool2: false,
     contractAddress: "0xf4766552D15AE4d256Ad41B6cf2933482B0680dc",
     priceDecimals: 8
@@ -73,6 +79,7 @@ export const priceMaps: PriceMap[] = [
     iswsExod: false,
     isStable: false,
     isOracle: true,
+    isUniLp: false,
     isWeightedPool2: false,
     contractAddress: "0x5E1DEE184a4809EBfcEDa72E4287f4d2d62dC6C1",
     priceDecimals: 8
@@ -84,6 +91,7 @@ export const priceMaps: PriceMap[] = [
     iswsExod: false,
     isStable: false,
     isOracle: true,
+    isUniLp: false,
     isWeightedPool2: false,
     contractAddress: "0xB90Fc1e595C19d84eAeC802f95d32619bB2dE7A0",
     priceDecimals: 8
@@ -95,6 +103,7 @@ export const priceMaps: PriceMap[] = [
     iswsExod: false,
     isStable: false,
     isOracle: false,
+    isUniLp: false,
     isWeightedPool2: true,
     contractAddress: "0x03c6B3f09D2504606936b1A4DeCeFaD204687890",
     priceDecimals: 18,
@@ -106,6 +115,7 @@ export const priceMaps: PriceMap[] = [
     iswsExod: false,
     isStable: true,
     isOracle: false,
+    isUniLp: false,
     isWeightedPool2: false,
     contractAddress: "",
     priceDecimals: 0,

@@ -9,6 +9,7 @@ export function loadOrCreateExodian(address: string): Exodian {
     exodian.sExodBalance = BigDecimal.zero()
     exodian.wsExodBalance = BigDecimal.zero()
     exodian.heldSince = BigInt.zero()
+    exodian.active = true
   }
   return exodian
 }

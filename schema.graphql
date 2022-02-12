@@ -146,6 +146,7 @@ type BondDeposit @entity {
   valueIn: BigDecimal!
   valueOut: BigDecimal!
   bond: Bond!
+  timestamp: BigInt!
 }
 
 #Exodian
@@ -155,10 +156,12 @@ type Exodian @entity {
   sExodBalance: BigDecimal!
   wsExodBalance: BigDecimal!
   heldSince: BigInt!
+  active: Boolean!
 }
 
 #Holders
 type Aux @entity {
   id: ID!
   totalHolders: BigInt!
+  hourlyTimestamp: BigInt!
 }

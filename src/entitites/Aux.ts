@@ -6,6 +6,7 @@ export function loadOrCreateAux(): Aux {
   if (!aux) {
     aux = new Aux("0")
     aux.totalHolders = BigInt.zero()
+    aux.hourlyTimestamp = BigInt.zero()
   }
   return aux
 }
