@@ -76,11 +76,11 @@ function updateBptLiquidity(address: Address, dayTimestamp: string, balance: Big
     const vestingToken = tokenContract.try_vestingToken()
     //not fBeets o.O
     if (vestingToken.reverted) {
-      return updateTokenBalance(address, dayTimestamp, false, balance, "", fetchBalance)
+      return updateTokenBalance(address, dayTimestamp, false, liquidity.balance, "", fetchBalance)
     } else {
       const vestingTokenBalance = getVestingTokenBalance(vestingToken.value, address, liquidity.balance)
       updateBptLiquidity(vestingToken.value, dayTimestamp, vestingTokenBalance, false)
-      return updateTokenBalance(address, dayTimestamp, false, balance, "", false)
+      return updateTokenBalance(address, dayTimestamp, false, liquidity.balance, "", false)
     }
   }
   
