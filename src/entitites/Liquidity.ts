@@ -23,12 +23,12 @@ export function loadOrCreateLiquidity(id: string): Liquidity {
   return liquidity
 }
 
-export function updateBptLiquidities(tokens: Address[], dayTimestamp: string, balances: BigDecimal[] = []): TokenValue {
+export function updateBptLiquidities(tokens: Address[], dayTimestamp: string, balances: BigDecimal[] = [], fetchBalance: boolean = true): TokenValue {
   const tokenValues: TokenValue = {
     riskFreeValue: BigDecimal.zero(),
     riskyValue: BigDecimal.zero()
   }
-  if (balances.length) {
+  if (!fetchBalance) {
     for (let i = 0; i < tokens.length; i ++) {
       const _tokenValues = updateBptLiquidity(tokens[i], dayTimestamp, balances[i], false)
       tokenValues.riskFreeValue = tokenValues.riskFreeValue.plus(_tokenValues.riskFreeValue)
@@ -76,11 +76,11 @@ function updateBptLiquidity(address: Address, dayTimestamp: string, balance: Big
     const vestingToken = tokenContract.try_vestingToken()
     //not fBeets o.O
     if (vestingToken.reverted) {
-      return updateTokenBalance(address, dayTimestamp, false, BigDecimal.zero(), id)
+      return updateTokenBalance(address, dayTimestamp, false, balance, "", fetchBalance)
     } else {
       const vestingTokenBalance = getVestingTokenBalance(vestingToken.value, address, liquidity.balance)
-      updateBptLiquidity(vestingToken.value, dayTimestamp, vestingTokenBalance)
-      return updateTokenBalance(address, dayTimestamp, false)
+      updateBptLiquidity(vestingToken.value, dayTimestamp, vestingTokenBalance, false)
+      return updateTokenBalance(address, dayTimestamp, false, balance, "", false)
     }
   }
   

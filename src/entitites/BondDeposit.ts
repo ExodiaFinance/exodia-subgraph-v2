@@ -23,15 +23,19 @@ export function createBondDeposit(bond: BondCreated): BondInfo {
   const bondId = `${tokenIn.toHexString()}-${tokenOut.toHexString()}-${dayTimestamp}`
   const amountIn = toDecimal(bond.params.deposit, getDecimals(tokenIn))
   let amountOut: BigDecimal = BigDecimal.zero()
-  const terms = bondContract.terms()
-  if (!terms.value5) {
-    amountOut = toDecimal(bond.params.payout, getDecimals(tokenOut))
+  const terms = bondContract.try_terms()
+  if (!terms.reverted) {
+    if (!terms.value.value5) {
+      amountOut = toDecimal(bond.params.payout, getDecimals(tokenOut))
+    } else {
+      const payoutBeforeFee = toDecimal(bond.params.payout, getDecimals(tokenOut))
+      const fee = payoutBeforeFee
+        .times(terms.value.value4.toBigDecimal())
+        .div(BigDecimal.fromString("10000"))
+      amountOut = payoutBeforeFee.plus(fee)
+    }
   } else {
-    const payoutBeforeFee = toDecimal(bond.params.payout, getDecimals(tokenOut))
-    const fee = payoutBeforeFee
-      .times(terms.value4.toBigDecimal())
-      .div(BigDecimal.fromString("10000"))
-    amountOut = payoutBeforeFee.plus(fee)
+    amountOut = toDecimal(bond.params.payout, getDecimals(tokenOut))
   }
   const valueIn = amountIn.times(getPrice(tokenIn))
   const valueOut = amountOut.times(getPrice(tokenOut))

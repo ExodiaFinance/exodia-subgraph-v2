@@ -44,7 +44,7 @@ export function updateTreasury(dayTimestamp: string, blockNumber: BigInt): void 
     const riskFreeAsset = getRiskFreeAssets(blockNumber)
     const assetsWithRisks = getAssetsWithRisks(blockNumber)
     
-    const bptValues = updateBptLiquidities(bpt.addresses, dayTimestamp, bpt.balances)
+    const bptValues = updateBptLiquidities(bpt.addresses, dayTimestamp, bpt.balances, false)
     const uniLpValues = updateUniLiquidities(uniLp.addresses, dayTimestamp, uniLp.balances)
     const riskFreeValues = updateTokenBalances(riskFreeAsset.addresses, dayTimestamp, true, riskFreeAsset.balances)
     const riskyValues = updateTokenBalances(assetsWithRisks.addresses, dayTimestamp, false, assetsWithRisks.balances)
