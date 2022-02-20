@@ -2,6 +2,7 @@ import { Address, BigDecimal } from "@graphprotocol/graph-ts";
 import { Bond, BondCreated } from "../../generated/DAIBond/Bond";
 import { BondDeposit } from "../../generated/schema";
 import { dayFromTimestamp, getDecimals, toDecimal } from "../utils/helpers";
+import { loadOrCreateExodian } from "./Exodian";
 import { loadOrCreateToken } from "./Token";
 import { getPrice } from "./TokenBalance";
 
@@ -13,6 +14,8 @@ export class BondInfo {
   valueIn: BigDecimal
   valueOut: BigDecimal
   bondId: string
+  allTimeBondId: string
+  dayTimestamp: string
 }
 
 export function createBondDeposit(bond: BondCreated): BondInfo {
@@ -21,22 +24,9 @@ export function createBondDeposit(bond: BondCreated): BondInfo {
   const tokenOut = bondContract.OHM()
   const dayTimestamp = dayFromTimestamp(bond.block.timestamp)
   const bondId = `${tokenIn.toHexString()}-${tokenOut.toHexString()}-${dayTimestamp}`
+  const allTimeBondId = `${tokenIn.toHexString()}-${tokenOut.toHexString()}`
   const amountIn = toDecimal(bond.params.deposit, getDecimals(tokenIn))
-  let amountOut: BigDecimal = BigDecimal.zero()
-  const terms = bondContract.try_terms()
-  if (!terms.reverted) {
-    if (!terms.value.value5) {
-      amountOut = toDecimal(bond.params.payout, getDecimals(tokenOut))
-    } else {
-      const payoutBeforeFee = toDecimal(bond.params.payout, getDecimals(tokenOut))
-      const fee = payoutBeforeFee
-        .times(terms.value.value4.toBigDecimal())
-        .div(BigDecimal.fromString("10000"))
-      amountOut = payoutBeforeFee.plus(fee)
-    }
-  } else {
-    amountOut = toDecimal(bond.params.payout, getDecimals(tokenOut))
-  }
+  const amountOut = toDecimal(bond.params.payout, getDecimals(tokenOut))
   const valueIn = amountIn.times(getPrice(tokenIn))
   const valueOut = amountOut.times(getPrice(tokenOut))
 
@@ -49,7 +39,11 @@ export function createBondDeposit(bond: BondCreated): BondInfo {
   bondDeposit.amountOut = amountOut
   bondDeposit.valueIn = valueIn
   bondDeposit.valueOut = valueOut
-  bondDeposit.bond = bondId
+  bondDeposit.bondRevenue = bondId
+  bondDeposit.allTimeBondRevenue = allTimeBondId
+  const bonder = loadOrCreateExodian(bond.transaction.from.toHexString())
+  bonder.save()
+  bondDeposit.bonder = bonder.id
   bondDeposit.timestamp = bond.block.timestamp
   bondDeposit.save()
 
@@ -61,6 +55,8 @@ export function createBondDeposit(bond: BondCreated): BondInfo {
     valueIn,
     valueOut,
     bondId,
+    allTimeBondId,
+    dayTimestamp
   }
 }
 
@@ -74,7 +70,9 @@ export function loadOrCreateBondDeposit(txHash: string): BondDeposit {
     bondDeposit.amountOut = BigDecimal.zero()
     bondDeposit.valueIn = BigDecimal.zero()
     bondDeposit.valueOut = BigDecimal.zero()
-    bondDeposit.bond = ""
+    bondDeposit.bondRevenue = ""
+    bondDeposit.allTimeBondRevenue = ""
+    bondDeposit.bonder = ""
   }
   return bondDeposit
 }

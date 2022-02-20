@@ -40,6 +40,7 @@ export function handleTransfer(transfer: Transfer): void {
       aux.totalHolders = aux.totalHolders.plus(BigInt.fromU32(1))
       aux.save()
       receiver.heldSince = transfer.block.timestamp
+      receiver.active = true
     }
     receiver.wsExodBalance = toDecimal(wsExodERC20.balanceOf(transfer.params.to), 9)
     receiver.save()

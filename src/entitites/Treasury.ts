@@ -8,13 +8,13 @@ import { bptLiquidities, uniLiquidities, assetsWithRisk, riskFreeAssets } from "
 import { ERC20 } from "../../generated/TreasuryTracker/ERC20"
 import { toDecimal } from "../utils/helpers"
 import { BeethovenxMasterChef } from "../../generated/TreasuryTracker/BeethovenxMasterChef"
-import { updateRunway } from "./ProtocolMetric"
  
-export function updateTreasury(dayTimestamp: string, blockNumber: BigInt): void {
+export function updateTreasury(dayTimestamp: string, blockNumber: BigInt): TokenValue {
   const treasury = loadOrCreateTreasury(dayTimestamp)
   const treasuryValues: TokenValue = {
     riskFreeValue: BigDecimal.zero(),
-    riskyValue: BigDecimal.zero()
+    riskyValue: BigDecimal.zero(),
+    backingValue: BigDecimal.zero()
   }
 
   //if TreasuryTracker contract deployed
@@ -38,6 +38,10 @@ export function updateTreasury(dayTimestamp: string, blockNumber: BigInt): void 
       .plus(uniLpValues.riskyValue)
       .plus(riskFreeValues.riskyValue)
       .plus(riskyValues.riskyValue)
+    treasuryValues.backingValue = bptValues.backingValue
+      .plus(uniLpValues.backingValue)
+      .plus(riskFreeValues.backingValue)
+      .plus(riskyValues.backingValue)
   } else {
     const bpt = getBpts(blockNumber)
     const uniLp = getUniLps(blockNumber)
@@ -57,12 +61,18 @@ export function updateTreasury(dayTimestamp: string, blockNumber: BigInt): void 
       .plus(uniLpValues.riskyValue)
       .plus(riskFreeValues.riskyValue)
       .plus(riskyValues.riskyValue)
+    treasuryValues.backingValue = bptValues.backingValue
+      .plus(uniLpValues.backingValue)
+      .plus(riskFreeValues.backingValue)
+      .plus(riskyValues.backingValue)
   }
 
   treasury.riskFreeValue = treasuryValues.riskFreeValue
   treasury.marketValue = treasuryValues.riskFreeValue.plus(treasuryValues.riskyValue)
+  treasury.backingValue = treasuryValues.backingValue
+  treasury.timestamp = dayTimestamp
   treasury.save()
-  updateRunway(dayTimestamp, treasury.riskFreeValue)
+  return treasuryValues
 }
 
 export function loadOrCreateTreasury(timestamp: string): Treasury {
@@ -71,6 +81,8 @@ export function loadOrCreateTreasury(timestamp: string): Treasury {
     treasury = new Treasury(timestamp)
     treasury.marketValue = BigDecimal.zero()
     treasury.riskFreeValue = BigDecimal.zero()
+    treasury.backingValue = BigDecimal.zero()
+    treasury.timestamp = ""
   }
   return treasury
 }

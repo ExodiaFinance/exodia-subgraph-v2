@@ -69,6 +69,8 @@ type SimpleStaking @entity {
   apy: BigDecimal!
   index: BigDecimal!
   rebaseRate: BigDecimal!
+  timestamp: String!
+  stakedPercentage: BigDecimal!
 }
 
 #Protocol metric
@@ -76,11 +78,15 @@ type ProtocolMetric @entity {
   id: ID!
   circulatingSupply: BigDecimal!
   totalSupply: BigDecimal!
-  price: BigDecimal!
+  exodPrice: BigDecimal!
+  wsExodPrice: BigDecimal!
+  backingPerExod: BigDecimal!
   marketCap: BigDecimal!
   tvl: BigDecimal!
   holders: BigInt!
   runway: BigDecimal!
+  dilution: BigDecimal!
+  timestamp: String!
 }
 
 #Treasury
@@ -88,8 +94,10 @@ type Treasury @entity {
   id: ID!
   marketValue: BigDecimal!
   riskFreeValue: BigDecimal!
+  backingValue: BigDecimal!
   liquidities: [Liquidity!]! @derivedFrom(field: "treasury")
   tokenBalances: [TokenBalance!]! @derivedFrom(field: "treasury")
+  timestamp: String!
 }
 
 #Liquidity
@@ -124,7 +132,7 @@ type Token @entity {
 }
 
 #Bond
-type Bond @entity {
+type BondRevenue @entity {
   id: ID!
   tokenIn: Token!
   tokenOut: Token!
@@ -134,6 +142,25 @@ type Bond @entity {
   valueOut: BigDecimal!
   debtRatio: BigInt!
   timestamp: BigInt!
+  dailyBondRevenue: DailyBondRevenue!
+}
+
+type DailyBondRevenue @entity {
+  id: ID!
+  valueIn: BigDecimal!
+  valueOut: BigDecimal!
+  bonds: [BondRevenue!]! @derivedFrom(field: "dailyBondRevenue")
+  timestamp: String!
+}
+
+type AllTimeBondRevenue @entity {
+  id: ID!
+  tokenIn: Token!
+  tokenOut: Token!
+  amountIn: BigDecimal!
+  amountOut: BigDecimal!
+  valueIn: BigDecimal!
+  valueOut: BigDecimal!
 }
 
 #BondDeposit
@@ -145,7 +172,9 @@ type BondDeposit @entity {
   amountOut: BigDecimal!
   valueIn: BigDecimal!
   valueOut: BigDecimal!
-  bond: Bond!
+  bondRevenue: BondRevenue!
+  allTimeBondRevenue: AllTimeBondRevenue!
+  bonder: Exodian!
   timestamp: BigInt!
 }
 

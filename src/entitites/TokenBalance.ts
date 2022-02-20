@@ -7,7 +7,7 @@ import { TreasuryTracker } from "../../generated/TreasuryTracker/TreasuryTracker
 import { UniswapV2Pair } from "../../generated/TreasuryTracker/UniswapV2Pair"
 import { WeightedPool } from "../../generated/TreasuryTracker/WeightedPool"
 import { WeightedPool2 } from "../../generated/ExodiaERC20Token/WeightedPool2"
-import { BALANCERVAULT_CONTRACT, TREASURY_TRACKER_CONTRACT } from "../utils/constants"
+import { BALANCERVAULT_CONTRACT, EXOD_ERC20_CONTRACT, TREASURY_TRACKER_CONTRACT, WSEXOD_ERC20_CONTRACT } from "../utils/constants"
 import { getDecimals, getExodPrice, toDecimal } from "../utils/helpers"
 import { priceMaps } from "../utils/priceMap"
 import { getIndex } from "./ProtocolMetric"
@@ -16,6 +16,7 @@ import { loadOrCreateToken } from "./Token"
 export class TokenValue {
   riskFreeValue: BigDecimal
   riskyValue: BigDecimal
+  backingValue: BigDecimal
 }
 
 export function loadOrCreateTokenBalance(id: string): TokenBalance {
@@ -43,7 +44,8 @@ export function updateTokenBalances(
 ): TokenValue {
   const tokenValues: TokenValue = {
     riskFreeValue: BigDecimal.zero(),
-    riskyValue: BigDecimal.zero()
+    riskyValue: BigDecimal.zero(),
+    backingValue: BigDecimal.zero()
   }
 
   if (balances.length) {
@@ -51,12 +53,14 @@ export function updateTokenBalances(
       const _tokenValues = updateTokenBalance(tokens[i], timestamp, riskFree, balances[i], liquidityId, false)
       tokenValues.riskFreeValue = tokenValues.riskFreeValue.plus(_tokenValues.riskFreeValue)
       tokenValues.riskyValue = tokenValues.riskyValue.plus(_tokenValues.riskyValue)
+      tokenValues.backingValue = tokenValues.backingValue.plus(_tokenValues.backingValue)
     }
   } else {
     for (let i = 0; i < tokens.length; i++) {
       const _tokenValues = updateTokenBalance(tokens[i], timestamp, riskFree, BigDecimal.zero(), liquidityId, true)
       tokenValues.riskFreeValue = tokenValues.riskFreeValue.plus(_tokenValues.riskFreeValue)
       tokenValues.riskyValue = tokenValues.riskyValue.plus(_tokenValues.riskyValue)
+      tokenValues.backingValue = tokenValues.backingValue.plus(_tokenValues.backingValue)
     }
   }
   
@@ -95,15 +99,22 @@ export function updateTokenBalance(
   tokenBalance.token = token.id
   tokenBalance.save()
 
+  let backingValue = BigDecimal.zero()
+  if (!isExodOrwsExod(address)) {
+    backingValue = tokenBalance.value
+  }
+
   if (riskFree) {
     return {
       riskFreeValue: tokenBalance.value,
-      riskyValue: BigDecimal.zero()
+      riskyValue: BigDecimal.zero(),
+      backingValue
     }
   } else {
     return {
       riskFreeValue: BigDecimal.zero(),
-      riskyValue: tokenBalance.value
+      riskyValue: tokenBalance.value,
+      backingValue
     }
   }
 }
@@ -229,4 +240,11 @@ function getWeightedPool2Price(contractAddress: string): BigDecimal {
   const decimals = poolContract.decimals()
   const price = toDecimal(poolContract.getLatest(0), decimals)
   return price
+}
+
+function isExodOrwsExod(address: Address): boolean {
+  return (
+    address.equals(ByteArray.fromHexString(EXOD_ERC20_CONTRACT)) ||
+    address.equals(ByteArray.fromHexString(WSEXOD_ERC20_CONTRACT))
+  )
 }

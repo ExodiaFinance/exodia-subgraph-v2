@@ -26,19 +26,22 @@ export function loadOrCreateLiquidity(id: string): Liquidity {
 export function updateBptLiquidities(tokens: Address[], dayTimestamp: string, balances: BigDecimal[] = [], fetchBalance: boolean = true): TokenValue {
   const tokenValues: TokenValue = {
     riskFreeValue: BigDecimal.zero(),
-    riskyValue: BigDecimal.zero()
+    riskyValue: BigDecimal.zero(),
+    backingValue: BigDecimal.zero()
   }
   if (!fetchBalance) {
     for (let i = 0; i < tokens.length; i ++) {
       const _tokenValues = updateBptLiquidity(tokens[i], dayTimestamp, balances[i], false)
       tokenValues.riskFreeValue = tokenValues.riskFreeValue.plus(_tokenValues.riskFreeValue)
       tokenValues.riskyValue = tokenValues.riskyValue.plus(_tokenValues.riskyValue)
+      tokenValues.backingValue = tokenValues.backingValue.plus(_tokenValues.backingValue)
     }
   } else {
     for (let i = 0; i < tokens.length; i ++) {
       const _tokenValues = updateBptLiquidity(tokens[i], dayTimestamp)
       tokenValues.riskFreeValue = tokenValues.riskFreeValue.plus(_tokenValues.riskFreeValue)
       tokenValues.riskyValue = tokenValues.riskyValue.plus(_tokenValues.riskyValue)
+      tokenValues.backingValue = tokenValues.backingValue.plus(_tokenValues.backingValue)
     }
   }
 
@@ -102,19 +105,22 @@ function updateBptLiquidity(address: Address, dayTimestamp: string, balance: Big
 export function updateUniLiquidities(tokens: Address[], dayTimestamp: string, balances: BigDecimal[] = []): TokenValue {
   const tokenValues: TokenValue = {
     riskFreeValue: BigDecimal.zero(),
-    riskyValue: BigDecimal.zero()
+    riskyValue: BigDecimal.zero(),
+    backingValue: BigDecimal.zero()
   }
   if (balances.length) {
     for (let i = 0; i < tokens.length; i ++) {
       const _tokenValue = updateUniLiquidity(tokens[i], dayTimestamp, balances[i], false)
       tokenValues.riskFreeValue = tokenValues.riskFreeValue.plus(_tokenValue.riskFreeValue)
       tokenValues.riskyValue = tokenValues.riskyValue.plus(_tokenValue.riskyValue)
+      tokenValues.backingValue = tokenValues.backingValue.plus(_tokenValue.backingValue)
     }
   } else {
     for (let i = 0; i < tokens.length; i ++) {
       const _tokenValue = updateUniLiquidity(tokens[i], dayTimestamp)
       tokenValues.riskFreeValue = tokenValues.riskFreeValue.plus(_tokenValue.riskFreeValue)
       tokenValues.riskyValue = tokenValues.riskyValue.plus(_tokenValue.riskyValue)
+      tokenValues.backingValue = tokenValues.backingValue.plus(_tokenValue.backingValue)
     }
   }
   return tokenValues
@@ -168,5 +174,6 @@ function updateUniLiquidity(address: Address, dayTimestamp: string, balance: Big
 
   tokenValue0.riskFreeValue = tokenValue0.riskFreeValue.plus(tokenValue1.riskFreeValue)
   tokenValue0.riskyValue = tokenValue0.riskyValue.plus(tokenValue1.riskyValue)
+  tokenValue0.backingValue = tokenValue0.backingValue.plus(tokenValue1.backingValue)
   return tokenValue0
 }
