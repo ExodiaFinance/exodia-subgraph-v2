@@ -193,4 +193,6 @@ type Aux @entity {
   id: ID!
   totalHolders: BigInt!
   hourlyTimestamp: BigInt!
+  historicalGOhmMapped: Boolean!
+  historicalGOhmValue: BigDecimal!
 }

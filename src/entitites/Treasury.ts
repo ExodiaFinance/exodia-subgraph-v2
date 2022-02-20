@@ -1,5 +1,5 @@
-import { Address, BigDecimal, BigInt, Bytes, log } from "@graphprotocol/graph-ts"
-import { Treasury } from "../../generated/schema"
+import { Address, BigDecimal, BigInt } from "@graphprotocol/graph-ts"
+import { Aux, Treasury } from "../../generated/schema"
 import { TreasuryTracker } from "../../generated/TreasuryTracker/TreasuryTracker"
 import { BEETHOVEN_MASTERCHEF_CONTRACT, DAO_WALLET, TREASURY_CONTRACT, TREASURY_TRACKER_CONTRACT } from "../utils/constants"
 import { updateBptLiquidities, updateUniLiquidities } from "./Liquidity"
@@ -67,9 +67,17 @@ export function updateTreasury(dayTimestamp: string, blockNumber: BigInt): Token
       .plus(riskyValues.backingValue)
   }
 
+  let historicalGOhmValue = BigDecimal.zero()
+  if (BigInt.fromString(dayTimestamp).le(BigInt.fromString("1641859200"))) {
+    let aux = Aux.load(dayTimestamp)
+    if (!!aux) {
+      historicalGOhmValue = aux.historicalGOhmValue
+    }
+  }
+
   treasury.riskFreeValue = treasuryValues.riskFreeValue
-  treasury.marketValue = treasuryValues.riskFreeValue.plus(treasuryValues.riskyValue)
-  treasury.backingValue = treasuryValues.backingValue
+  treasury.marketValue = treasuryValues.riskFreeValue.plus(treasuryValues.riskyValue).plus(historicalGOhmValue)
+  treasury.backingValue = treasuryValues.backingValue.plus(historicalGOhmValue)
   treasury.timestamp = dayTimestamp
   treasury.save()
   return treasuryValues

@@ -1,5 +1,5 @@
 import { BigDecimal, Address, ByteArray, BigInt, Bytes } from "@graphprotocol/graph-ts"
-import { TokenBalance } from "../../generated/schema"
+import { Aux, Token, TokenBalance } from "../../generated/schema"
 import { BalancerVault } from "../../generated/TreasuryTracker/BalancerVault"
 import { ERC20 } from "../../generated/TreasuryTracker/ERC20"
 import { PriceOracle } from "../../generated/ExodiaERC20Token/PriceOracle"
@@ -12,6 +12,7 @@ import { getDecimals, getExodPrice, toDecimal } from "../utils/helpers"
 import { priceMaps } from "../utils/priceMap"
 import { getIndex } from "./ProtocolMetric"
 import { loadOrCreateToken } from "./Token"
+import { gOhmHistory } from "../utils/gOhmHistory"
 
 export class TokenValue {
   riskFreeValue: BigDecimal
@@ -247,4 +248,34 @@ function isExodOrwsExod(address: Address): boolean {
     address.equals(ByteArray.fromHexString(EXOD_ERC20_CONTRACT)) ||
     address.equals(ByteArray.fromHexString(WSEXOD_ERC20_CONTRACT))
   )
+}
+
+export function updateGOhmHistoricalValue(): void {
+  const gOhmAddress = "0x91fa20244fb509e8289ca630e5db3e9166233fdc"
+  const token = new Token(gOhmAddress)
+  token.ticker = "gOHM"
+  token.fullName = "Governance OHM"
+  token.save()
+  for (let i = 0; i < gOhmHistory.length; i++) {
+    const timestamp = gOhmHistory[i].timestamp
+    const id = `${gOhmAddress}-${timestamp}`
+  
+    const tokenBalance = loadOrCreateTokenBalance(id)
+    tokenBalance.balance = BigDecimal.fromString(gOhmHistory[i].value)
+    tokenBalance.value = BigDecimal.fromString(gOhmHistory[i].value)
+    tokenBalance.treasury = timestamp
+    tokenBalance.isRiskFree = false
+    tokenBalance.isLiquidity = false
+    tokenBalance.liquidity = ""
+    tokenBalance.timestamp = BigInt.fromString(timestamp)
+    tokenBalance.token = token.id
+    tokenBalance.save()
+    
+    const aux = new Aux(timestamp)
+    aux.totalHolders = BigInt.zero()
+    aux.hourlyTimestamp = BigInt.zero()
+    aux.historicalGOhmMapped = true
+    aux.historicalGOhmValue = tokenBalance.value
+    aux.save()
+  }
 }

@@ -42,6 +42,7 @@ export function createBondDeposit(bond: BondCreated): BondInfo {
   bondDeposit.bondRevenue = bondId
   bondDeposit.allTimeBondRevenue = allTimeBondId
   const bonder = loadOrCreateExodian(bond.transaction.from.toHexString())
+  bonder.active = true
   bonder.save()
   bondDeposit.bonder = bonder.id
   bondDeposit.timestamp = bond.block.timestamp

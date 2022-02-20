@@ -8,6 +8,7 @@ import { dayFromTimestamp, hourFromTimestamp, toDecimal } from "../utils/helpers
 import { updateHolders, updateProtocolMetric } from "../entitites/ProtocolMetric";
 import { updateSimpleStaking } from "../entitites/SimpleStaking";
 import { updateTreasury } from "../entitites/Treasury";
+import { updateGOhmHistoricalValue } from "../entitites/TokenBalance";
 
 export function handleTransfer(transfer: Transfer): void {
   const dayTimestamp = dayFromTimestamp(transfer.block.timestamp)
@@ -19,6 +20,12 @@ export function handleTransfer(transfer: Transfer): void {
     const treasuryValues = updateTreasury(dayTimestamp, transfer.block.number)
     updateProtocolMetric(dayTimestamp, treasuryValues)
     updateSimpleStaking(dayTimestamp)
+  }
+
+  if(!aux.historicalGOhmMapped) {
+    updateGOhmHistoricalValue()
+    aux.historicalGOhmMapped = true
+    aux.save()
   }
 
   const exodERC20 = ERC20.bind(Address.fromString(EXOD_ERC20_CONTRACT))

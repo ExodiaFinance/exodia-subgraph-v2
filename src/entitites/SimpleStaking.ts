@@ -80,5 +80,5 @@ export function getIndex(): BigDecimal {
     Address.fromString(EXOD_STAKING_CONTRACT)
   );
   const index = toDecimal(exodStakingContract.index(), 9);
-  return index
+  return index;
 }
