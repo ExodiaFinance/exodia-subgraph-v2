@@ -4,22 +4,31 @@ import { Transfer } from "../../generated/TreasuryTracker/EXODERC20";
 import { loadOrCreateExodian } from "../entitites/Exodian";
 import { loadOrCreateAux } from "../entitites/Aux";
 import { EXOD_ERC20_CONTRACT } from "../utils/constants";
-import { dayFromTimestamp, hourFromTimestamp, toDecimal } from "../utils/helpers";
+import { dayFromTimestamp, minuteFromTimestamp, toDecimal } from "../utils/helpers";
 import { updateHolders, updateProtocolMetric } from "../entitites/ProtocolMetric";
 import { updateSimpleStaking } from "../entitites/SimpleStaking";
 import { updateTreasury } from "../entitites/Treasury";
 import { updateGOhmHistoricalValue } from "../entitites/TokenBalance";
 
+function updateMetrics(dayTimestamp: string, block: BigInt): void {
+  const treasuryValues = updateTreasury(dayTimestamp, block)
+  updateProtocolMetric(dayTimestamp, treasuryValues)
+  updateSimpleStaking(dayTimestamp)
+}
+
 export function handleTransfer(transfer: Transfer): void {
   const dayTimestamp = dayFromTimestamp(transfer.block.timestamp)
-  const hourTimestamp = hourFromTimestamp(transfer.block.timestamp)
+  const minuteTimestamp = minuteFromTimestamp(transfer.block.timestamp)
   const aux = loadOrCreateAux()
-  if (aux.hourlyTimestamp.notEqual(hourTimestamp)) {
-    aux.hourlyTimestamp = hourTimestamp
+  const auxMinuteTimestamp = aux.minuteTimestamp
+  if (!auxMinuteTimestamp) {
+    aux.minuteTimestamp = minuteTimestamp
     aux.save()
-    const treasuryValues = updateTreasury(dayTimestamp, transfer.block.number)
-    updateProtocolMetric(dayTimestamp, treasuryValues)
-    updateSimpleStaking(dayTimestamp)
+    updateMetrics(dayTimestamp, transfer.block.number)
+  } else if (auxMinuteTimestamp.notEqual(minuteTimestamp)) {
+    aux.minuteTimestamp = minuteTimestamp
+    aux.save()
+    updateMetrics(dayTimestamp, transfer.block.number)
   }
 
   if(!aux.historicalGOhmMapped) {
