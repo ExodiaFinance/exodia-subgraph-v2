@@ -26,6 +26,11 @@ export function hourFromTimestamp(timestamp: BigInt): BigInt {
   return hourTs
 }
 
+export function minuteFromTimestamp(timestamp: BigInt): BigInt {
+  const minuteTs = timestamp.minus(timestamp.mod(BigInt.fromU32(60)))
+  return minuteTs
+}
+
 export function getExodPrice(): BigDecimal {
   const pair = UniswapV2Pair.bind(Address.fromString(SLP_EXODDAI_PAIR))
 
