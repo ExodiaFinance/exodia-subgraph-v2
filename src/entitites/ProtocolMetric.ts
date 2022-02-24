@@ -1,9 +1,9 @@
 import { BigDecimal, Address, BigInt } from "@graphprotocol/graph-ts";
 import { ProtocolMetric } from "../../generated/schema";
-import { CirculatingSupply } from "../../generated/TreasuryTracker/CirculatingSupply";
-import { EXODERC20 } from "../../generated/TreasuryTracker/EXODERC20";
-import { ExodStaking } from "../../generated/TreasuryTracker/ExodStaking";
-import { SEXODERC20 } from "../../generated/TreasuryTracker/SEXODERC20";
+import { CirculatingSupply } from "../../generated/ExodiaERC20Token/CirculatingSupply";
+import { EXODERC20 } from "../../generated/ExodiaERC20Token/EXODERC20";
+import { ExodStaking } from "../../generated/ExodiaERC20Token/ExodStaking";
+import { SEXODERC20 } from "../../generated/ExodiaERC20Token/SEXODERC20";
 import {
   CIRCULATING_SUPPLY_CONTRACT,
   EXOD_ERC20_CONTRACT,

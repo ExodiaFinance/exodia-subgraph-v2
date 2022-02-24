@@ -1,6 +1,6 @@
 import { Address } from "@graphprotocol/graph-ts"
 import { Token } from "../../generated/schema"
-import { ERC20 } from "../../generated/TreasuryTracker/ERC20"
+import { ERC20 } from "../../generated/ExodiaERC20Token/ERC20"
 
 export function loadOrCreateToken(address: string): Token {
   let token = Token.load(address)

@@ -1,7 +1,7 @@
 import { Address, BigDecimal } from "@graphprotocol/graph-ts";
 import { SimpleStaking } from "../../generated/schema";
-import { ExodStaking } from "../../generated/TreasuryTracker/ExodStaking";
-import { SEXODERC20 } from "../../generated/TreasuryTracker/SEXODERC20";
+import { ExodStaking } from "../../generated/ExodiaERC20Token/ExodStaking";
+import { SEXODERC20 } from "../../generated/ExodiaERC20Token/SEXODERC20";
 import {
   EXOD_STAKING_CONTRACT,
   SEXOD_ERC20_CONTRACT,
