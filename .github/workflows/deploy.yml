@@ -1,0 +1,16 @@
+name: deploy graph
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - run: npm install -g @graphprotocol/graph-cli
+      - run: npm i
+      - run: graph deploy --access-token ${{secrets.THE_GRAPH_ACCESS_TOKEN}} --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ ExodiaFinance/exodia-subgraph-v2 subgraph.yaml
