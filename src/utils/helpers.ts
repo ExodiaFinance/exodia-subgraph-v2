@@ -1,6 +1,6 @@
 import { Address, BigInt, BigDecimal } from "@graphprotocol/graph-ts"
-import { ERC20 } from "../../generated/TreasuryTracker/ERC20"
-import { UniswapV2Pair } from "../../generated/TreasuryTracker/UniswapV2Pair"
+import { ERC20 } from "../../generated/ExodiaERC20Token/ERC20"
+import { UniswapV2Pair } from "../../generated/ExodiaERC20Token/UniswapV2Pair"
 import { SLP_EXODDAI_PAIR } from "./constants"
 
 export function getDecimals(token: Address): number {

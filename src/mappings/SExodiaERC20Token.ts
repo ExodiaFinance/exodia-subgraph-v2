@@ -1,6 +1,6 @@
 import { Address, BigDecimal, BigInt } from "@graphprotocol/graph-ts";
-import { ERC20 } from "../../generated/TreasuryTracker/ERC20";
-import { Transfer } from "../../generated/TreasuryTracker/EXODERC20";
+import { ERC20 } from "../../generated/ExodiaERC20Token/ERC20";
+import { Transfer } from "../../generated/ExodiaERC20Token/EXODERC20";
 import { loadOrCreateExodian } from "../entitites/Exodian";
 import { loadOrCreateAux } from "../entitites/Aux";
 import { SEXOD_ERC20_CONTRACT } from "../utils/constants";

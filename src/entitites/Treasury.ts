@@ -1,13 +1,13 @@
 import { Address, BigDecimal, BigInt } from "@graphprotocol/graph-ts"
 import { Aux, Treasury } from "../../generated/schema"
-import { TreasuryTracker } from "../../generated/TreasuryTracker/TreasuryTracker"
+import { TreasuryTracker } from "../../generated/ExodiaERC20Token/TreasuryTracker"
 import { BEETHOVEN_MASTERCHEF_CONTRACT, DAO_WALLET, TREASURY_CONTRACT, TREASURY_TRACKER_CONTRACT } from "../utils/constants"
 import { updateBptLiquidities, updateUniLiquidities } from "./Liquidity"
 import { TokenValue, updateTokenBalances } from "./TokenBalance"
 import { bptLiquidities, uniLiquidities, assetsWithRisk, riskFreeAssets } from "../utils/assetMap"
-import { ERC20 } from "../../generated/TreasuryTracker/ERC20"
+import { ERC20 } from "../../generated/ExodiaERC20Token/ERC20"
 import { toDecimal } from "../utils/helpers"
-import { BeethovenxMasterChef } from "../../generated/TreasuryTracker/BeethovenxMasterChef"
+import { BeethovenxMasterChef } from "../../generated/ExodiaERC20Token/BeethovenxMasterChef"
  
 export function updateTreasury(dayTimestamp: string, blockNumber: BigInt): TokenValue {
   const treasury = loadOrCreateTreasury(dayTimestamp)
